@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='us-ascii'?> 
+<Ability>
+	<tName>Fireball</tName>
+	<iDuration>10</iDuration>
+	<iCooldown>10</iCooldown>
+	<tCastType>PointTarget</tCastType>
+	<tLevellingType>Normal</tLevellingType>
+	<tColor>Red</tColor>
+</Ability>
