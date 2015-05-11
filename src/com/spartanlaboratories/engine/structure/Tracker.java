@@ -72,12 +72,7 @@ public final class Tracker extends StructureObject {
 			setEntityTracked(REND_HUMAN_NUKEPATH, true);
 			break;
 		}
-		try {
-			initialize();
-		} catch (IOException e) {
-			System.out.println("Something went wrong with the initialization of the tracker");
-			e.printStackTrace();
-		}
+		initialize();
 	}
 	private void initEntityNames(){
 		entityNames[0] = "Unit Selection"; entityNames[1] = "Tick"; entityNames[2] = "Render"; entityNames[3] = "Quadtree reset";

@@ -13,8 +13,18 @@ import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.structure.Util.NullColorException;
 
 public abstract class Map extends StructureObject{
+	/**
+	 * This number represents at which point in the array of move points a new move point is to be placed. It is extremely important that this 
+	 * value is set to zero before starting to add move points to a new ruleset.
+	 */
 	public int numberOfMovePoints;
+	/**
+	 * A Constant that states the maximum number of sets of movements rules that can be contained by an array of movement point rules for every faction.
+	 */
 	public final int maxRules = 10;
+	/**
+	 * Represents the largest number of movement points that can be contained by a single ruleset of movement points
+	 */
 	public final int maxMovePoints = 30;
 	public Location[][][] movePoints = new Location[Alive.Faction.values().length][maxRules][maxMovePoints];
 	public TerrainObject[] terrain = new TerrainObject[(int) (engine.getWrap().x / 15)];
@@ -32,7 +42,7 @@ public abstract class Map extends StructureObject{
 		spawnPeriod = 30;
 		spawnRune = false;
 	}
-	protected abstract void initializeSpawnPoints();
+	protected  void initializeSpawnPoints(){}
 	public abstract void init();
 	private void generateTerrain(){
 		final int obstacleWidth = TerrainObject.defaultTerrainSize;
@@ -70,13 +80,15 @@ public abstract class Map extends StructureObject{
 		drawBorder();
 		if(rune.active)engine.util.drawActor(rune, camera);
 	}
-	protected abstract void drawBorder();
-	public void tick(){
+	protected void drawBorder(){}
+	void tick(){
 		if(engine.util.everySecond(spawnPeriod))
 			spawn();
 		for(Alive a:Alive.allAlives)if(!a.tick())engine.addToDeleteList(a);
 		if(spawnRune)tickRune();
+		update();
 	}
+	protected abstract void update();
 	final private void tickRune(){
 		for(Alive vo: engine.qt.getAlivesAroundLocation(rune.getLocation()))
 			if(rune.active && Hero.class.isAssignableFrom(vo.getClass()) && engine.util.checkForCollision(vo, rune))rune.use((Hero) vo);
@@ -92,14 +104,12 @@ public abstract class Map extends StructureObject{
 		}
 	}
 	/**
-	 * <b>spawn</b><br><br><code>final public void spawn()</code><br><br>
-	 * Makes every spawn point spawn
+	 * When invoked goes through the list of all Spawn Points contained by this map and makes each one spawn one unit that it was set to spawn.
 	 */
 	final public void spawn(){
 		for(SpawnPoint csp: spawnPoints)csp.spawn();
 	}
 	/**
-	 * <b>addCreepSpawnPoint</b><br><br><code>final protected void addCreepSpawnPoint(Alive.Faction faction, Location location)</code><br><br>
 	 * Creates a new <a href="SpawnPoint.html">Spawn Point</a> that will spawn creeps of the passed in faction at the passed in location.
 	 * @param faction The faction of the Creep that this Spawn Point will be spawning
 	 * @param location The location of this spawn point and the location where the creeps spawned by this spawn point are to be placed
@@ -131,5 +141,11 @@ public abstract class Map extends StructureObject{
 	final public boolean withinBorders(Actor a){
 		return a.getLocation().x > 0 && a.getLocation().y > 0 &&
 				a.getLocation().x < engine.getWrap().x && a.getLocation().y < engine.getWrap().y;
+	}
+	/**
+	 * Resets the number of movement points
+	 */
+	public void resetNumPoints(){
+		numberOfMovePoints = 0;
 	}
 }

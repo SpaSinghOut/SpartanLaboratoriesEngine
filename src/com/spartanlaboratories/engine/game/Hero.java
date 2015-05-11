@@ -45,20 +45,6 @@ public class Hero<Element extends Ability> extends Alive{
 		inventory = new ItemList(inventorySize, ItemList.Type.INVENTORY, this);
 		initHeroType(HeroType.RAZOR);
 	}
-	private void initStats(){
-		changeBaseSpeed(300);
-		changeStat(Constants.visibilityRange, 900);
-		changeStat(Constants.maxHealth, Constants.baseHealth);
-		changeStat(Constants.health, getStat(Constants.maxHealth));
-		changeStat(Constants.maxMana, 300);
-		changeStat(Constants.mana, getStat(Constants.maxMana));
-		changeStat(Constants.manaRegen, 1);
-		changeStat(Constants.healthRegen, 0.1);
-		changeStat(Constants.experienceGiven, 200);
-		changeStat(Constants.startingDamage, 0);
-		changeStat(Constants.abilityPoints, 1);
-		changeStat(Constants.attackSpeed, 0);
-	}
 	public void initHeroType(HeroType setHeroType){
 		heroType = setHeroType;
 		changeStat(Constants.mana, getStat(Constants.maxMana) - getStat(Constants.mana));
@@ -89,20 +75,17 @@ public class Hero<Element extends Ability> extends Alive{
 			if(b.activationTrigger == Buff.TriggerType.ONSPELLCAST)
 				b.trigger(this);
 	}
+	@Override
 	public void die(){
 		super.die();
 		owner.setRespawnTimer(2);
 		Alive.allAlives.remove(this);
 	}
+	@Override
 	public boolean drawMe(Camera fromCamera)throws Util.NullColorException{
 		if(!super.drawMe(fromCamera, getRGB()))return false;
 		engine.util.drawActor(manaBar, manaBar.color, fromCamera);
 		return true;
-	}
-	private void debug(){
-		System.out.println("Hero: " + "Attack state: " + getAttackState());
-		System.out.println("Hero: " + "immobile: " + immobile);
-		System.out.println("Hero: " + "needToMove: " + needToMove);
 	}
 	public void setWidth(double width){
 		super.setWidth(width);
@@ -135,5 +118,24 @@ public class Hero<Element extends Ability> extends Alive{
 	}
 	public void leftClick(Location locationOnScreen, Camera camera){
 		castSpell(equippedSpell);
+	}
+	private void initStats(){
+		changeBaseSpeed(300);
+		changeStat(Constants.visibilityRange, 900);
+		changeStat(Constants.maxHealth, Constants.baseHealth);
+		changeStat(Constants.health, getStat(Constants.maxHealth));
+		changeStat(Constants.maxMana, 300);
+		changeStat(Constants.mana, getStat(Constants.maxMana));
+		changeStat(Constants.manaRegen, 1);
+		changeStat(Constants.healthRegen, 0.1);
+		changeStat(Constants.experienceGiven, 200);
+		changeStat(Constants.startingDamage, 0);
+		changeStat(Constants.abilityPoints, 1);
+		changeStat(Constants.attackSpeed, 0);
+	}
+	private void debug(){
+		System.out.println("Hero: " + "Attack state: " + getAttackState());
+		System.out.println("Hero: " + "immobile: " + immobile);
+		System.out.println("Hero: " + "needToMove: " + needToMove);
 	}
 }

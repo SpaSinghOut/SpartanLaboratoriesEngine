@@ -31,18 +31,14 @@ public class Engine{
 	 * Manual modification of this is best  avoided as even if this was used to terminate the program it would not terminate correctly.
 	 */
 	public boolean running;
-	private int xDisplay;
-	private int yDisplay;
 	public final int heroPickSecondDelay = 0;
 	public ArrayList<Controller> controllers = new ArrayList<Controller>();
-	private final Location wrap = new Location(3000,2000);
 	public ArrayList<Missile> missiles = new ArrayList<Missile>();
-	public int tickCount;
-	private ArrayList<GameObject> deleteThis = new ArrayList<GameObject>();
 	public ArrayList<Actor> allActors = new ArrayList<Actor>();
 	public Map map; //DO NOT INITIALIZE HERE, will not work due to opengl context requirement
+	public int tickCount;
 	/**
-	 * <ul><b>pause</b><p><code>&#8195;public boolean pause</code><p>One of the variables that controls the state of execution. Setting this to true would 
+	 * One of the variables that controls the state of execution. Setting this to true would 
 	 * "pause" execution, stopping the ticks of all game objects but continuing the rendering. Pressing the p key will pause as well as prompt the user
 	 * that execution is paused.
 	 */
@@ -50,13 +46,19 @@ public class Engine{
 	public Quadtree<Double, VisibleObject>  qt = new Quadtree<Double, VisibleObject>(this);
 	public Tracker tracker = new Tracker(this);
 	public Util util = new Util(this);
-	private final ResolutionMode resolutionMode = ResolutionMode.SCAN;
-	static long time;
 	/** The rate at which the game updates in updates/second 
 	 * */
 	public static int tickRate;
 	public ArrayList<VisibleObject> visibleObjects = new ArrayList<VisibleObject>();
 	public TypeHandler<StructureObject> typeHandler;
+	public Thread logic;
+	
+	private int xDisplay;
+	private int yDisplay;
+	private final Location wrap = new Location(3000,2000);
+	private ArrayList<GameObject> deleteThis = new ArrayList<GameObject>();
+	private final ResolutionMode resolutionMode = ResolutionMode.SCAN;
+	static long time;
 	private double initializationProgress;
 	/**
 	 * <h1>Creates an engine</h1>
@@ -136,7 +138,6 @@ public class Engine{
 		tracker = new Tracker(this);
 		tracker.initialize();
 		SLEXMLException.engine = this;
-		controllers.add(new Human(this, Alive.Faction.RADIANT));
 		map = (Map) typeHandler.typeGetter.get("map");
 		map.init();
 		tickCount = 0;
@@ -166,16 +167,19 @@ public class Engine{
 		yDisplay = (int)(0.98f * GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getHeight());
 	}
 	private void run(){
-		new Thread(new RunThread(1)).start();
-		new Thread(new RunThread(2)).start();
+		logic = new Thread(new RunThread(1));
+		logic.start();
+		//new Thread(new RunThread(2)).start();
 		
-		while(running);
-		/*if(System.nanoTime() > time + 1000000000 / Engine.tickRate){
+		while(running)
+		if(System.nanoTime() > time + 1000000000 / Engine.tickRate){
 			time += 1000000000 / Engine.tickRate;
+			/*
 			if(tickCount++ > Engine.tickRate * heroPickSecondDelay)
 				if(!pause)tick();
+			*/
 			render();
-		}*/
+		}
 		
 	}
 	private void tick(){

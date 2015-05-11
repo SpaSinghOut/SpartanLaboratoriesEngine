@@ -179,11 +179,10 @@ final public class Human extends Controller{
 		}
 		return null;
 	}
-	/**<ul>
-	 * <b>LeftClickState</b><p><code>&#8195;public enum LeftClickState</code><p>
+	/**
 	 * The possible states that determine the action that is to be undertaken should the left mouse button be pressed.
+	 * 
 	 * @author Spartak
-	 *
 	 */
 	public enum LeftClickState{
 		DEFAULT, ABILITYUSE, ABILITYTAKE,;
@@ -225,7 +224,7 @@ final public class Human extends Controller{
 	 * act out and throw an exception if the engine user is not using the default camera implementation. (if no actions are taken with the cameras list then
 	 * it is very unlikely that this method will throw an exception as the entire display is covered by the default camera.)
 	 * @return A location in the "real world" at which the cursor is located
-	 * @throws SLEImproperInputException
+	 * @throws SLEImproperInputException - If the location of the mouse is not covered by any camera
 	 */
 	public Location getMouseInWorld() throws SLEImproperInputException{
 		return new Location(getMouseLocation(), coveringCamera(getMouseLocation()));
@@ -245,7 +244,7 @@ final public class Human extends Controller{
 			Mouse.getY() > edgePanningRange && Mouse.getY() < engine.getScreenDimensions().y - edgePanningRange)
 			camera.resetCameraSpeed();
 	}
-	/**<b><ul>getPrimaryCamera<p><code></b>&#8195;public Camera getPrimaryCamera()<p></code>
+	/**
 	 * Returns the first camera is this Human's list of cameras
 	 * @return A camera object that is the first in this Human's list of camera objects
 	 */

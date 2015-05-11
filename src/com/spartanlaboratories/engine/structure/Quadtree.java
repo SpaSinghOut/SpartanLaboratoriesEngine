@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.VisibleObject;
 
-/**<ul>
- * <h1>One of the most important classes in the entire program, the Quadtree</h1>
- * <p><code>&#8195;final public class Quadtree<Number extends Comparable, Element> extends StructureObject</code><p>
+/**<b> One of the most important classes in the entire engine: The Quadtree</b>
+ * <p>
  * This object is meant to store all the existing game object and their locations. Then it is able to 
  * retrieve a list of those that are within a certain area. This is crucial for many parts of the engine
  * that iterate on lists of actor as they are no longer required to check the entire list of everything that
@@ -17,8 +16,8 @@ import com.spartanlaboratories.engine.game.VisibleObject;
  * @author Spartak
  * @version Pre-A
  *
- * @param <Number>
- * @param <Element>
+ * @param <Number> A Type of Number
+ * @param <Element> The type of class that this quadtree will be containing
  */
 final public class Quadtree<Number extends Comparable, Element> extends StructureObject{
 	private Node root;

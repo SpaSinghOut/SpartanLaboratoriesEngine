@@ -1,8 +1,8 @@
 package com.spartanlaboratories.engine.structure;
 
-public class UnitTest extends Map{
+class UnitTest extends Map{
 
-	public UnitTest(Engine engine) {
+	private UnitTest(Engine engine) {
 		super(engine);
 		// TODO Auto-generated constructor stub
 	}
@@ -30,5 +30,11 @@ public class UnitTest extends Map{
 		engine.typeHandler.newEntry("map", new UnitTest(engine));
 		engine.init();
 		engine.start();
+	}
+
+	@Override
+	protected void update() {
+		// TODO Auto-generated method stub
+		
 	}
 }

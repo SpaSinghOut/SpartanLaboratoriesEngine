@@ -24,7 +24,7 @@ public class Camera extends StructureObject{
 		}
 	}
 	/**
-	 * A <a href = "Location.html">Location</a> that designates the center of this Camera's point of view in the "real" world
+	 * A {@linkplain Location} that designates the center of this Camera's point of view in the "real" world
 	 */
 	public Location worldLocation;
 	/**
@@ -33,8 +33,10 @@ public class Camera extends StructureObject{
 	public Location monitorLocation;
 	/**
 	 * A Location that stores how far away from the {@link #worldLocation} objects can be seen by this Camera. The x coordinate represents the total width of view
-	 * of the Camera and the y coordinate represents the total height of view of the Camera. So if this Location's coordinates are ({@link #x},{@link #y}) then the camera will be 
-	 * able to see objects that are {@link #x}/2 to the right or left of the {@link #worldLocation} and {@link #y}/2 up or down from the {@link #worldLocation}. When a camera is 
+	 * of the Camera and the y coordinate represents the total height of view of the Camera. 
+	 * So if this Location's coordinates are (x,y) then the camera will be 
+	 * able to see objects that are x/2 to the right or left of the {@link #worldLocation} and y/2 up or down from the 
+	 * {@link #worldLocation}. When a camera is 
 	 * created the dimensions location is set to the resolution of the monitor (unless a custom display size was specified) and it is usually better 
 	 * to be left that way unless a single display is being used to render the view of multiple Cameras.
 	 * 

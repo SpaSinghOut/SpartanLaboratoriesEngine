@@ -8,15 +8,10 @@ import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.Missile;
 import com.spartanlaboratories.engine.game.VisibleObject;
 /**
- * 
- * <ul>
- * <h1>The Engine's Utility Class</h1>
- * <p>
- * <code>&#8195;public class Util extends StructureObject</code>
+ * <b> The Engine's Utility Class </b>
  * <p>
  * Hold a variety of utility methods that don't have a place within an object.
- * </ul> 
- * 
+ *
  * @author Spartak
  *
  */

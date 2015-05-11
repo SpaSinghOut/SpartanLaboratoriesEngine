@@ -23,16 +23,6 @@ public class Console extends StructureObject{;
 		owner = player;
 		execution = 1;
 	}
-	private void initializeCommandNames(){
-		commandNames = new String[7];
-		commandNames[0] = "help";
-		commandNames[1] = "resetHeroLocation";
-		commandNames[2] = "setHeroLocation";
-		commandNames[3] = "changeAbilityLevel";
-		commandNames[4] = "changeHeroStat";
-		commandNames[5] = "respawn";
-		commandNames[6] = "using";
-	}
 	public void takeCommand(String inputText) {
 		try {
 			parser.parseString(inputText + " ");
@@ -43,11 +33,32 @@ public class Console extends StructureObject{;
 		} catch (com.spartanlaboratories.engine.structure.Console.Parser.IdentifierException 
 				| com.spartanlaboratories.engine.structure.Console.Executer.CommandExecutionException e) {
 			out(e.getLocalizedMessage());
+		}finally{
+			parser.commands.clear();
 		}
 	}
 	public void out(String string){
 		System.out.println(string);
 	}
+	/**
+	 * Adds the passed in command to the list of command names that this Console's Command Parser recognises. 
+	 * @param commandName The name of the new command
+	 * @param numberOfParameters The number of parameters that the new command has
+	 */
+	public void addCommand(String commandName, int numberOfParameters){
+		parser.numParams.put(commandName, numberOfParameters);
+	}
+	private void initializeCommandNames(){
+		commandNames = new String[7];
+		commandNames[0] = "help";
+		commandNames[1] = "resetHeroLocation";
+		commandNames[2] = "setHeroLocation";
+		commandNames[3] = "changeAbilityLevel";
+		commandNames[4] = "changeHeroStat";
+		commandNames[5] = "respawn";
+		commandNames[6] = "using";
+	}
+	
 	/**
 	 * Obsolete, deprecated, likely to throw, and even more likely to cause an error.
 	 * @param string
@@ -151,10 +162,10 @@ public class Console extends StructureObject{;
 			private void considerParams(){
 				int atLocation = myLocation + string.length() + 1;
 				owner.owner.out("Starting to look for parameters at character number: " + atLocation);
-				for(int i = 0; i < params.length; i++){
+				for(int i = 0; i < params.length;i++){
 					params[i] = owner.readUntilBlank(atLocation);
 					owner.owner.out("Parameter number " + (i+1) + " was read as " + params[i] + " and its size is: " + params[i].length());
-					atLocation += params[i].length();
+					atLocation += params[i].length() + 1;
 				}
 			}
 			private void considerCommand(){
@@ -229,11 +240,11 @@ public class Console extends StructureObject{;
 				return type;
 			}
 		}
-		Console owner;
+		protected Console owner;
 		public Executer(Console owner){
 			this.owner = owner;
 		}
-		public void execute(String[] readReadyCommand) throws CommandExecutionException{
+		public boolean execute(String[] readReadyCommand) throws CommandExecutionException{
 			owner.out("about to execute a command named: " + readReadyCommand[0]);
 			switch(readReadyCommand[0]){
 			case "consider":
@@ -280,9 +291,10 @@ public class Console extends StructureObject{;
 				for(VisibleObject vo: owner.engine.visibleObjects)
 					owner.engine.tracker.log(vo.toString());
 				break;
-			default: throw new CommandExecutionException("Executer did not recognize the command");
+			default:
+				throw new CommandExecutionException("Executer did not recognize the command");
 			}
-			owner.parser.commands.clear();
+			return true;
 		}
 	}
 }

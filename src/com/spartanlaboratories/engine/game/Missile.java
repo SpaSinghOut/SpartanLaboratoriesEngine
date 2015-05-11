@@ -10,17 +10,16 @@ public class Missile extends Actor{
 	boolean penetrating;
 	/**
 	 * The Constructor that is to be used if specification of a custom target location is needed
-	 * @param setSpellName
-	 * @param setParent
-	 * @param passX
-	 * @param passY
+	 * @param setSpellName - Represents the generic stats of the missile that is being created
+	 * @param setParent	- The Alive that created this missile
+	 * @param passX	- The x coordinate of this missile's target location
+	 * @param passY - The y coordinate of this missile's target location
 	 */
 	public Missile(MissileStats setSpellName,  Alive setParent, double passX, double passY){
 		super(setParent.engine);
 		genericMissileInit(setSpellName, setParent);
 		setLocation(new Location(setParent.getLocation().x, setParent.getLocation().y));
 		goTo(new Location(passX, passY));
-		setMovement(target);
 		movementType = Actor.MovementType.DIRECTIONBASED;
 		penetrating = missileType.penetrating;
 	}

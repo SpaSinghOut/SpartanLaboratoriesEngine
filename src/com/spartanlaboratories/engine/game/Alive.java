@@ -68,13 +68,6 @@ public class Alive extends Actor{
 	public enum DamageType{
 		PHYSICAL, MAGICAL, PURE, UNIVERSAL, HPREMOVAL,;
 	}
-	private void attackOrientedInit() {
-	permissions[Constants.autoAttackAllowed] = true;
-	changeStat(Constants.baseAttackTime, 1.7);
-	changeStat(Constants.baseAttackSpeed, 100);
-	changeStat(Constants.baseAnimationTime, 1);
-	this.resetAllAttackCDs();
-	}
 	public boolean tick(){
 		if (invulnerabilityCount--!=0);
 		else invulnerable = false;
@@ -89,31 +82,41 @@ public class Alive extends Actor{
 		alive = getStat(Constants.health) > 0;
 		return super.tick() && alive;
 	}
-	protected void regen(){
-		if(getClass() == Hero.class){
-			if(stats[Constants.healthRegen] > 0)
-				changeStat(Constants.health, stats[Constants.healthRegen] / engine.tickRate);
-			if(stats[Constants.manaRegen] > 0)
-				changeStat(Constants.mana, stats[Constants.manaRegen] / engine.tickRate);
-		}
-		else if(getClass() == Creep.class){
-			if(stats[Constants.healthRegen] > 0)
-				changeStat(Constants.health, stats[Constants.healthRegen] / engine.tickRate);
-		}
-	}
 	public void heal(int heal){
 		stats[Constants.health] += heal;
-	}
-	protected boolean isVisible(Actor seen){
-		return (engine.util.getRealCentralDistance(this, seen) < this.stats[Constants.visibilityRange]);
-	}
-	protected boolean isAttackTargetWithinAttackRange(){
-		return (engine.util.getRealCentralDistance(this, attackTarget) < stats[Constants.attackRange] + getWidth() / 2 + attackTarget.getWidth() / 2);
 	}
 	public void setFaction(Faction setFaction){
 		faction = setFaction;
 	}
-	protected void issueAttack(Alive attacking){
+	public void dealDamage(Alive attacking, double damageDealt, DamageType setDamageType){
+		for(Buff b: getBuffs())
+			if(b.activationTrigger == Buff.TriggerType.ONDEALINGDAMAGE)
+				b.trigger(attackTarget);
+		double calculateRealDamage = damageDealt < 0 ? 0 : damageDealt;
+		attacking.takeDamage(this, calculateRealDamage, setDamageType );
+	}
+	public void takeDamage(Alive attacker, double d, DamageType damageType){
+		for(Buff b: getBuffs())
+			if(b.activationTrigger == Buff.TriggerType.ONTAKINGDAMAGE)
+				b.trigger(attackTarget);
+		d *= 1 - ( getStat(Constants.armor) * .06 ) / ( 1 + getStat(Constants.armor) * .06);
+		changeStat(Constants.health, -d);
+		if(stats[Constants.health] <= 0 && alive){
+			lastHitter = attacker;
+			die();
+			attacker.kill(this);
+		}
+	}
+	final public void setStat(int stat, double newValue){
+		stats[stat] = newValue;
+	}
+	final protected boolean isVisible(Actor seen){
+		return (engine.util.getRealCentralDistance(this, seen) < this.stats[Constants.visibilityRange]);
+	}
+	final protected boolean isAttackTargetWithinAttackRange(){
+		return (engine.util.getRealCentralDistance(this, attackTarget) < stats[Constants.attackRange] + getWidth() / 2 + attackTarget.getWidth() / 2);
+	}
+	final protected void issueAttack(Alive attacking){
 		if(attacking.attackState == AttackState.NONE || attacking.attackState == AttackState.SELECTED ||
 		attacking.attackState == AttackState.MOVING)
 			if(attacking.faction != this.faction)
@@ -121,7 +124,7 @@ public class Alive extends Actor{
 			if(b.activationTrigger == Buff.TriggerType.ONATTACKDECLARATION)
 				b.trigger(attackTarget);
 	}
-	protected void getTargeted(Alive attacker){
+	final  protected void getTargeted(Alive attacker){
 		for(Buff b: getBuffs())
 			if(b.activationTrigger == Buff.TriggerType.ONBEINGTARGETED)
 				b.trigger(attackTarget);
@@ -179,28 +182,6 @@ public class Alive extends Actor{
 		for(Buff b: getBuffs())
 			if(b.activationTrigger == Buff.TriggerType.ONSPELLAFFECTED)
 				b.trigger(caster);		
-	}
-	public void dealDamage(Alive attacking, double damageDealt, DamageType setDamageType){
-		for(Buff b: getBuffs())
-			if(b.activationTrigger == Buff.TriggerType.ONDEALINGDAMAGE)
-				b.trigger(attackTarget);
-		double calculateRealDamage = damageDealt < 0 ? 0 : damageDealt;
-		attacking.takeDamage(this, calculateRealDamage, setDamageType );
-	}
-	public void takeDamage(Alive attacker, double d, DamageType damageType){
-		for(Buff b: getBuffs())
-			if(b.activationTrigger == Buff.TriggerType.ONTAKINGDAMAGE)
-				b.trigger(attackTarget);
-		d *= 1 - ( getStat(Constants.armor) * .06 ) / ( 1 + getStat(Constants.armor) * .06);
-		changeStat(Constants.health, -d);
-		if(stats[Constants.health] <= 0 && alive){
-			lastHitter = attacker;
-			die();
-			attacker.kill(this);
-		}
-	}
-	final public void setStat(int stat, double newValue){
-		stats[stat] = newValue;
 	}
 	public void changeStat(int stat, double netChange){
 		switch(stat){
@@ -316,89 +297,6 @@ public class Alive extends Actor{
 	public AttackState getAttackState(){
 		return attackState;
 	}
-	private void configureAttack(){
-		needToMove = attackTarget == null && target != null;
-		changePermissions(Constants.movementAllowed, attackTarget == null && target != null);
-		if(attackTarget == null || !attackTarget.alive){
-			if(getAttackState() != AttackState.NONE)
-				setAttackState(Alive.AttackState.NONE);
-			needToMove = true;
-		}
-		else if(attackState == AttackState.NONE && attackTarget == null){
-			needToMove = true;
-		}
-		else if(attackState == AttackState.NONE && attackTarget != null && attackTarget.active){
-			aggroOn(attackTarget);
-		}
-		else if(attackState == AttackState.NONE && attackTarget != null && !attackTarget.active){
-			attackTarget = null;
-		}
-		else if(attackState == AttackState.SELECTED){
-			if(attackTarget == null){
-				needToMove = true;
-				this.setAttackState(Alive.AttackState.NONE);
-				target = null;
-				return;
-			}
-			if(!isVisible(attackTarget)){
-				attackTarget = null;
-				needToMove = true;
-				target = null;
-			}
-			else if(isVisible(attackTarget)){
-				if(isAttackTargetWithinAttackRange()){
-					issueAttack(attackTarget);
-					attackTarget.getTargeted(this);
-					setAttackState(Alive.AttackState.ANIMATION);
-				}
-				else if(!isAttackTargetWithinAttackRange()){
-					System.out.println(getStat(Constants.attackRange));
-					setAttackState(AttackState.MOVING);
-					needToMove = true;
-				}
-			}
-		}
-		else if(this.attackState == Alive.AttackState.MOVING){
-			if(attackTarget == null){
-				needToMove = true;
-				setAttackState(Alive.AttackState.NONE);
-				return;
-			}
-			if(!isAttackTargetWithinAttackRange()){
-			needToMove = true;
-			target = attackTarget.getLocation();
-			}
-			else {
-				target = null;
-				issueAttack(attackTarget);
-				setAttackState(Alive.AttackState.ANIMATION);
-			}
-		}
-		else if(this.attackState == Alive.AttackState.ANIMATION && stats[Constants.animationCD] >   0){
-			stats[Constants.animationCD]--;
-		}
-		else if(this.attackState == Alive.AttackState.ANIMATION && stats[Constants.animationCD] <= 0){
-			resetAnimationCD();
-			setAttackState(Alive.AttackState.RETRACTION);
-			this.doAttack(attackTarget);
-		}
-		else if(attackState == AttackState.RETRACTION && stats[Constants.retractionCD] > 0){
-			if(noRetraction)this.setAttackState(AttackState.WAIT);
-			stats[Constants.retractionCD]--;
-		}
-		else if(attackState == AttackState.RETRACTION && stats[Constants.retractionCD] <= 0){
-			this.resetRetractionCD();
-			this.setAttackState(Alive.AttackState.WAIT);
-		}
-		else if(attackState == AttackState.WAIT && stats[Constants.attackCD] > 0){
-			this.stats[Constants.attackCD]--;
-		}
-		else if(attackState == AttackState.WAIT && stats[Constants.attackCD] == 0){
-			if(attackTarget != null)setAttackState(AttackState.SELECTED);
-			else setAttackState(AttackState.NONE);
-			this.resetAttackCD();
-		}
-	}
 	protected void resetAnimationCD(){
 		this.stats[Constants.animationCD] = this.stats[Constants.baseAttackTime]
 				/ (this.stats[Constants.attackSpeed]  / 100) * (int)engine.tickRate
@@ -443,6 +341,12 @@ public class Alive extends Actor{
 			b.drawMe(camera);
 		return true;
 	}
+	
+	/**
+	 * Makes this Alive consider the passed in Alive as its attack target. Will change the alive's attack state to selected.
+	 * Might trigger buffs.
+	 * @param setTarget
+	 */
 	public void aggroOn(Alive setTarget){
 		if(setTarget == attackTarget)return;
 		if(setTarget != null)setAttackState(AttackState.SELECTED);
@@ -558,5 +462,107 @@ public class Alive extends Actor{
 		Alive targetedUnit = (Alive) (selected==null?null:Alive.class.isAssignableFrom(selected.getClass())?selected:null);
 		if(targetedUnit!=null)aggroOn(targetedUnit);
 		else super.rightClick(locationOnScreen, camera);
+	}
+	private void regen(){
+		if(getClass() == Hero.class){
+			if(stats[Constants.healthRegen] > 0)
+				changeStat(Constants.health, stats[Constants.healthRegen] / engine.tickRate);
+			if(stats[Constants.manaRegen] > 0)
+				changeStat(Constants.mana, stats[Constants.manaRegen] / engine.tickRate);
+		}
+		else if(getClass() == Creep.class){
+			if(stats[Constants.healthRegen] > 0)
+				changeStat(Constants.health, stats[Constants.healthRegen] / engine.tickRate);
+		}
+	}
+	private void attackOrientedInit() {
+	permissions[Constants.autoAttackAllowed] = true;
+	changeStat(Constants.baseAttackTime, 1.7);
+	changeStat(Constants.baseAttackSpeed, 100);
+	changeStat(Constants.baseAnimationTime, 1);
+	this.resetAllAttackCDs();
+	}
+	private void configureAttack(){
+		needToMove = attackTarget == null && target != null;
+		changePermissions(Constants.movementAllowed, attackTarget == null && target != null);
+		if(attackTarget == null || !attackTarget.alive){
+			if(getAttackState() != AttackState.NONE)
+				setAttackState(Alive.AttackState.NONE);
+			needToMove = true;
+		}
+		else if(attackState == AttackState.NONE && attackTarget == null){
+			needToMove = true;
+		}
+		else if(attackState == AttackState.NONE && attackTarget != null && attackTarget.active){
+			aggroOn(attackTarget);
+		}
+		else if(attackState == AttackState.NONE && attackTarget != null && !attackTarget.active){
+			attackTarget = null;
+		}
+		else if(attackState == AttackState.SELECTED){
+			if(attackTarget == null){
+				needToMove = true;
+				this.setAttackState(Alive.AttackState.NONE);
+				target = null;
+				return;
+			}
+			if(!isVisible(attackTarget)){
+				attackTarget = null;
+				needToMove = true;
+				target = null;
+			}
+			else if(isVisible(attackTarget)){
+				if(isAttackTargetWithinAttackRange()){
+					issueAttack(attackTarget);
+					attackTarget.getTargeted(this);
+					setAttackState(Alive.AttackState.ANIMATION);
+				}
+				else if(!isAttackTargetWithinAttackRange()){
+					System.out.println(getStat(Constants.attackRange));
+					setAttackState(AttackState.MOVING);
+					needToMove = true;
+				}
+			}
+		}
+		else if(this.attackState == Alive.AttackState.MOVING){
+			if(attackTarget == null){
+				needToMove = true;
+				setAttackState(Alive.AttackState.NONE);
+				return;
+			}
+			if(!isAttackTargetWithinAttackRange()){
+			needToMove = true;
+			target = attackTarget.getLocation();
+			}
+			else {
+				target = null;
+				issueAttack(attackTarget);
+				setAttackState(Alive.AttackState.ANIMATION);
+			}
+		}
+		else if(this.attackState == Alive.AttackState.ANIMATION && stats[Constants.animationCD] >   0){
+			stats[Constants.animationCD]--;
+		}
+		else if(this.attackState == Alive.AttackState.ANIMATION && stats[Constants.animationCD] <= 0){
+			resetAnimationCD();
+			setAttackState(Alive.AttackState.RETRACTION);
+			this.doAttack(attackTarget);
+		}
+		else if(attackState == AttackState.RETRACTION && stats[Constants.retractionCD] > 0){
+			if(noRetraction)this.setAttackState(AttackState.WAIT);
+			stats[Constants.retractionCD]--;
+		}
+		else if(attackState == AttackState.RETRACTION && stats[Constants.retractionCD] <= 0){
+			this.resetRetractionCD();
+			this.setAttackState(Alive.AttackState.WAIT);
+		}
+		else if(attackState == AttackState.WAIT && stats[Constants.attackCD] > 0){
+			this.stats[Constants.attackCD]--;
+		}
+		else if(attackState == AttackState.WAIT && stats[Constants.attackCD] == 0){
+			if(attackTarget != null)setAttackState(AttackState.SELECTED);
+			else setAttackState(AttackState.NONE);
+			this.resetAttackCD();
+		}
 	}
 }

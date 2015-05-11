@@ -45,7 +45,6 @@ public class Creep extends Alive{
 		}
 	}
 	/**
-	 * <b>MovementRule</b><br><br><code>public enum MovementRule</code><br><br>
 	 * The type of movement that a creep has.
 	 * @author Spartak
 	 * @since A1
@@ -58,7 +57,7 @@ public class Creep extends Alive{
 		/**Creep will follow a set of constant move points. Its behaviour after completing the set is configured by {@link #CMPRule}.*/CMP, 
 		/**Makes the creep follow a CMP rule set and sets {@link #CMPRule} to CYCLE*/PATROL,;
 		/**
-		 * <b>set</b><br><br><code>public void set(Creep c)</code><br><br>Configures the passed in Creep to have this movement rule.
+		 * Configures the passed in Creep to have this movement rule.
 		 * @param c The Creep that will have its movement rule changed to this one.
 		 */
 		public void set(Creep c){
@@ -221,8 +220,7 @@ public class Creep extends Alive{
 		rgb[2] *= getRatio("health");
 		return drawMe(camera, rgb);
 	}
-	/**<ul>
-	 * <b>copy</b><br><br><code>&#8195;public Creep copy()</code><br><br>Returns a new Creep that is a copy of this Creep
+	/**Returns a new Creep that is a copy of this Creep
 	 * @return c a new Creep that is a copy of this Creep
 	 * @see #copyTo(Creep)
 	 */
@@ -253,7 +251,7 @@ public class Creep extends Alive{
 		globalMovementRule = movementRule;
 	}
 	/**
-	 * <b>followsRuleSet</b><br><br><code>public void followsRuleSet(int ruleSet)</code><br><br>Makes this creep follow the passed in set of 
+	 * Makes this creep follow the passed in set of 
  	 *	constant movement point rules.
 	 * @param ruleSet this Creep's new set of cmp rules 
 	 */

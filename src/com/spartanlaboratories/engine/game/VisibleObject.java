@@ -28,6 +28,7 @@ public class VisibleObject extends GameObject{
 		super(engine);
 		engine.visibleObjects.add(this);
 		shape = Shape.QUAD;
+		textureInfo = new TextureInfo();
 	}
 	public enum Shape{
 		QUAD, TRI,;
@@ -52,13 +53,25 @@ public class VisibleObject extends GameObject{
 	public void setTexture(Texture setTexture){
 		texture = setTexture;
 	}
-	public void setTexture(String format, String namePath){
+	private TextureInfo textureInfo;
+	private class TextureInfo{
+		boolean updateNeeded;
+		String textureFormat;
+		String namePath;
+	}
+	private void updateTexture(){
 		try {
-			texture = TextureLoader.getTexture(format, ResourceLoader.getResourceAsStream(namePath));
+			texture = TextureLoader.getTexture(textureInfo.textureFormat, ResourceLoader.getResourceAsStream(textureInfo.namePath));
 		} catch (IOException e) {
 			System.out.println("A texture was set improperly");
 			e.printStackTrace();
 		}
+	}
+	public void setTexture(String format, String namePath){
+		textureInfo = new TextureInfo();
+		textureInfo.updateNeeded = true;
+		textureInfo.textureFormat = format;
+		textureInfo.namePath = namePath;
 	}
 	public float[] getRGB() throws Util.NullColorException{
 		if(color == null)throw engine.util.new NullColorException(engine, this);
@@ -77,6 +90,7 @@ public class VisibleObject extends GameObject{
 		return texture;
 	}
 	protected boolean drawMe(Camera camera, float[] RGB){
+		if(textureInfo.updateNeeded)updateTexture();
 		if(camera.canSeeObject(this)){
 			if(resetTexture){
 				try {

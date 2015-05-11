@@ -22,10 +22,8 @@ public abstract class GameObject extends StructureObject{
 	 */
 	protected ArrayList<GameObject> ownedObjects = new ArrayList<GameObject>();
 	/**
-	 * <b>GameObject</b><br><br>
-	 * <code>public GameObject(Engine engine)</code><br><br>
 	 * Creates a game object that uses the passed in engine to reference the world and structure objects.
-	 * @param setEngine
+	 * @param setEngine - The engine which this game object will be referencing
 	 */
 	public GameObject(Engine setEngine){
 		super(setEngine);
@@ -33,7 +31,7 @@ public abstract class GameObject extends StructureObject{
 		location = new Location();
 	}
 	/**
-	 * <ul><b>tick</b><br><br><code>&emsp;boolean tick()</code><br><br>Performs one update on the state of this game object.
+	 * Performs one update on the state of this game object.
 	 * @return whether or not this object is active
 	 */
 	boolean tick(){
@@ -41,7 +39,7 @@ public abstract class GameObject extends StructureObject{
 		return active;
 	}
 	/**
-	 * <b>copy</b><br><br><code>public abstract GameObject copy()</code><br><br>Returns a new GameObject that is a copy of this GameObject
+	 * Returns a new GameObject that is a copy of this GameObject
 	 * @return a new GameObject that is a copy of this GameObject
 	 */
 	public abstract GameObject copy();

@@ -127,6 +127,12 @@ public class Location{
 		return new Location(camera.monitorLocation.x - camera.worldLocation.x + x,
 				camera.monitorLocation.y - camera.worldLocation.y + y);
 	}
+	/** 
+	 * Returns a Location the coordinates of which are "real world" coordinates which correspond to the screen coordinates passed in.
+	 * @param locationOnScreen The location on screen whose coordinates are being converted to real world coordinates.
+	 * @param camera The camera that is viewing the location on screen.
+	 * @return a new Location with real world coordinates
+	 */
 	public static Location getLocationInWorld(Location locationOnScreen, Camera camera){
 		return new Location(camera.worldLocation.x + locationOnScreen.x - camera.monitorLocation.x,
 				camera.worldLocation.y - locationOnScreen.y + camera.monitorLocation.y);
@@ -134,11 +140,12 @@ public class Location{
 	/**
 	 * Sets the coordinates of this location to be what the coordinates of the passed location are in the "real" world. For example if a location on screen
 	 * is passed in with the coordinates (x1,y1) then first of all based on the camera the passed in location's coordinates will be converted to their "real"
-	 * values which are say (x2,y2) and then this location's coordinates will be set to (x2, y2)
+	 * values which are say (x2,y2) and then this location's coordinates will be set to (x2, y2). 
 	 * 
 	 * @param locationOnScreen the location on a screen whose "real" world coordinates will be assigned to this location
 	 * @param camera the camera that is viewing the passed location on screen
-	 * @see #getLocationInWorld(), {@link #Location(Location, Camera)}
+	 * @see #Location(Location, Camera)
+ 	 * @see #getLocationInWorld(Location, Camera)
 	 */
 	public void setFromScreen(Location locationOnScreen, Camera camera){
 		setCoords(camera.worldLocation.x + locationOnScreen.x - camera.monitorLocation.x,
