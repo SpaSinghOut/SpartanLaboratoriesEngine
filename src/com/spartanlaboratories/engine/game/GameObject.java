@@ -35,7 +35,7 @@ public abstract class GameObject extends StructureObject{
 	 * @return whether or not this object is active
 	 */
 	boolean tick(){
-		doOnTick();
+		update();
 		return active;
 	}
 	/**
@@ -85,5 +85,5 @@ public abstract class GameObject extends StructureObject{
 		location.setCoords(x,y);
 		updateComponentLocation();
 	}
-	public abstract void doOnTick();
+	public abstract void update();
 }

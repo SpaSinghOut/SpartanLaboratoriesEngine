@@ -165,5 +165,5 @@ public abstract class Buff extends GameObject{
 	protected void updateComponentLocation() {
 		// TODO Auto-generated method stub
 	}
-	public abstract void doOnTick();
+	public abstract void update();
 }

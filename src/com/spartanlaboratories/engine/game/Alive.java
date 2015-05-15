@@ -1,6 +1,5 @@
 package com.spartanlaboratories.engine.game;
 
-import java.security.acl.Owner;
 import java.util.ArrayList;
 
 import com.spartanlaboratories.engine.structure.Camera;
@@ -9,6 +8,7 @@ import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.Human;
 import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.Util;
+import com.spartanlaboratories.engine.structure.Util.NullColorException;
 
 public class Alive extends Actor{
 	static int experienceRange = 650;
@@ -41,10 +41,12 @@ public class Alive extends Actor{
 		needToMove = false;
 		initHealthBar();
 		alive = true;
+		setStat(Constants.maxHealth, 1);
+		setStat(Constants.health, 1);
 		allAlives.add(this);
-		permissions[Constants.movementAllowed]= true;
-		permissions[Constants.spellCastAllowed] = true;
-		permissions[Constants.channelingAllowed] = true;
+		for(int i = 0; i < permissions.length; i++)
+			permissions[i] = true;
+		//for(boolean b:permissions)b=true;
 		attackOrientedInit();
 		resetTexture = false;
 		solid = true;
@@ -52,9 +54,18 @@ public class Alive extends Actor{
 	}
 	protected void initHealthBar(){
 		healthBar = new VisibleObject(engine);
-		healthBar.setWidth(getWidth());
-		healthBar.setHeight(getHeight() * .25);
 		healthBar.solid = false;
+		switch(faction){
+		case RADIANT:
+			healthBar.color = Util.Color.GREEN;
+			break;
+		case DIRE:
+			healthBar.color = Util.Color.RED;
+			break;
+		case NEUTRAL:
+			healthBar.color = Util.Color.YELLOW;
+			break;
+		}
 	}
 	public enum AttackState{
 		NONE, SELECTED, MOVING, ANIMATION, RETRACTION, WAIT,;
@@ -63,13 +74,13 @@ public class Alive extends Actor{
 		LEFT, RIGHT, UP, DOWN,;
 	}
 	public enum Faction{
-		RADIANT, DIRE,;
+		RADIANT, DIRE, NEUTRAL,;
 	}
 	public enum DamageType{
 		PHYSICAL, MAGICAL, PURE, UNIVERSAL, HPREMOVAL,;
 	}
 	public boolean tick(){
-		if (invulnerabilityCount--!=0);
+		if (invulnerabilityCount-->0);
 		else invulnerable = false;
 		regen();
 		for(Buff buff: getBuffs())if(!buff.tick())engine.addToDeleteList(buff);
@@ -335,13 +346,14 @@ public class Alive extends Actor{
 	}
 	@Override
 	protected boolean drawMe(Camera camera, float[] RGB){
-		if(!super.drawMe(camera, RGB))return false;
-		engine.util.drawActor(healthBar, faction == Alive.Faction.RADIANT ? Util.Color.GREEN: Util.Color.RED, camera);
+		if(!super.drawMe(camera, RGB) || !alive)return false;
+		try {
+			healthBar.drawMe(camera);
+		} catch (NullColorException e){}
 		for(Buff b: getBuffs())
 			b.drawMe(camera);
 		return true;
 	}
-	
 	/**
 	 * Makes this Alive consider the passed in Alive as its attack target. Will change the alive's attack state to selected.
 	 * Might trigger buffs.
@@ -419,7 +431,6 @@ public class Alive extends Actor{
 		healthBar.setHeight((int)(height * .25));
 	}
 	protected void updateComponentLocation(){
-		healthBar.setWidth(healthBar.getWidth() * getRatio("health"));
 		healthBar.setLocation(new Location(
 				getLocation().x - getWidth() / 2 + getRatio("health") * getWidth() / 2,
 				getLocation().y - getHeight() / 2 - healthBar.getHeight() / 2));

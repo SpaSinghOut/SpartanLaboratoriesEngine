@@ -160,4 +160,17 @@ public class Location{
 		x -= previousChange.x;
 		y -= previousChange.y;
 	}
+	@Override
+	public String toString(){
+		return "(" + x +"," + y + ")";
+	}
+	public void print(){
+		System.out.println(toString());
+	}
+	public void printTo(Console console){
+		console.out(toString());
+	}
+	public Location copy(){
+		return new Location(this);
+	}
 }

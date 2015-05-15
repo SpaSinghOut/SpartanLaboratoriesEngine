@@ -56,6 +56,7 @@ public class Constants {
 	public static final int spellCastAllowed = 1;
 	public static final int autoAttackAllowed = 2;
 	public static final int channelingAllowed = 3;
+	
 	//the amount by which actors appear smaller on the minimap
 	public static final double mapMultiplicationFactor = 9;
 	public static final double mapToScreenSizeProportion = 0.1;

@@ -37,12 +37,7 @@ public class Tower extends Alive {
 		missile = true;
 		attackMissileType = new MissileStats("auto");
 		changePermissions(Constants.autoAttackAllowed, true);
-		try {
-			setTexture();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		//Dont remeber if this actually does anything
+		//Don't remember if this actually does anything
 		noRetraction = true;
 	}
 	public boolean tick(){

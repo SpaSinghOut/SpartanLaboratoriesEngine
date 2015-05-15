@@ -31,6 +31,7 @@ public class Engine{
 	 * Manual modification of this is best  avoided as even if this was used to terminate the program it would not terminate correctly.
 	 */
 	public boolean running;
+	public boolean concurrency;
 	public final int heroPickSecondDelay = 0;
 	public ArrayList<Controller> controllers = new ArrayList<Controller>();
 	public ArrayList<Missile> missiles = new ArrayList<Missile>();
@@ -167,17 +168,17 @@ public class Engine{
 		yDisplay = (int)(0.98f * GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getHeight());
 	}
 	private void run(){
-		logic = new Thread(new RunThread(1));
-		logic.start();
+		if(concurrency){
+			logic = new Thread(new RunThread(1));
+			logic.start();
+		}
 		//new Thread(new RunThread(2)).start();
 		
 		while(running)
 		if(System.nanoTime() > time + 1000000000 / Engine.tickRate){
 			time += 1000000000 / Engine.tickRate;
-			/*
-			if(tickCount++ > Engine.tickRate * heroPickSecondDelay)
+			if(!concurrency && tickCount++ > Engine.tickRate * heroPickSecondDelay)
 				if(!pause)tick();
-			*/
 			render();
 		}
 		

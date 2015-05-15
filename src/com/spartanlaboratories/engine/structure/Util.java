@@ -16,6 +16,13 @@ import com.spartanlaboratories.engine.game.VisibleObject;
  *
  */
 public class Util extends StructureObject{
+	/**
+	 * Thrown if an object is being drawn that has not had its color value initialized. Sets this 
+	 * object's color to white.
+	 * 
+	 * @author Spartak
+	 *
+	 */
 	public class NullColorException extends Exception {
 		public NullColorException(Engine engine, VisibleObject vo){
 			engine.tracker.printAndLog("A Null Color Exception has occured. A Visible Object of type: " + vo.getClass().getName()

@@ -116,11 +116,6 @@ public class Creep extends Alive{
 		}
 		color = Util.Color.WHITE;
 		allCreeps.add(this);
-		try {
-			setTexture();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		initializeWithDefaultRules();
 	}
 	public boolean tick(){

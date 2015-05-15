@@ -60,5 +60,5 @@ public class Aura<Element extends Buff> extends GameObject{
 		// TODO Auto-generated method stub
 		
 	}
-	public void doOnTick() {}
+	public void update() {}
 }

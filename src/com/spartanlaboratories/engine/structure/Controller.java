@@ -32,6 +32,7 @@ public class Controller extends StructureObject{
 	public Controller(Engine engine, Faction setFaction){
 		super(engine);
 		faction = setFaction;
+		engine.controllers.add(this);
 	}
 	/**
 	 * Makes this object "update" or perform one set of its regular operations.

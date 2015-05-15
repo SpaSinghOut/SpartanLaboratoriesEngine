@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.spartanlaboratories.engine.game.Ability;
 import com.spartanlaboratories.engine.game.Actor;
+import com.spartanlaboratories.engine.game.GameObject;
 import com.spartanlaboratories.engine.game.VisibleObject;
 
 public class Console extends StructureObject{;
@@ -37,6 +38,26 @@ public class Console extends StructureObject{;
 			parser.commands.clear();
 		}
 	}
+	/**
+	 * Prints the passed in location.
+	 * 
+	 * @param location
+	 */
+	public void showLocation(Location location){
+		out("(" + location.x +"," + location.y + ")");
+	}
+	/**
+	 * Prints the location of the passed in {@link GameObject}
+	 * 
+	 * @param g - The {@link GameObject} the location of which is to be printed.
+	 */
+	public void showLocationOf(GameObject g){
+		showLocation(g.getLocation());
+	}
+	/**
+	 * Outputs the given string. 
+	 * @param string - The String that is to be printed.
+	 */
 	public void out(String string){
 		System.out.println(string);
 	}

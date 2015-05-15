@@ -50,12 +50,6 @@ public class Hero<Element extends Ability> extends Alive{
 		changeStat(Constants.mana, getStat(Constants.maxMana) - getStat(Constants.mana));
 		missile = heroType.ranged;
 		changeStat(Constants.attackRange, heroType.range);
-		try { 
-			setTexture();
-		} catch (IOException e) {
-			System.out.println("an input/output exception has occured inside the 'initHeroType' function");
-			e.printStackTrace();
-		}
 		initialized = true;
 	}
 	public boolean tick(){
