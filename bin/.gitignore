@@ -46,12 +46,12 @@ Temporary Items
 /log.txt
 /doc/
 /hs_err_pid2260.log
-/.classpath
-/.gitattributes
 /.gitignore
 /.project
 /.settings/
 /Abilities.xml
 /Missiles.xml
 /SLE v. A1.2.1/
+/.classpath
+/.gitattributes
 /com/

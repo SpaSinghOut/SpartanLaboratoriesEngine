@@ -65,6 +65,13 @@ public class VisibleObject extends GameObject{
 		textureInfo.namePath = pathName;
 		return true;
 	}
+	/**
+	 * Experimental, notify if doesn't work. Attempts to set the texture of this object 
+	 * by using the string that was passed in as the location and name of the file.
+	 * @param pathName - A String objects that represents the location and name of the texture.
+	 * @return A boolean value that represents whether or not the function succeded at setting the 
+	 * texture.
+	 */
 	public boolean setTexture(String pathName){
 		if(!pathName.contains("."))return false;
 		String txt = "";
