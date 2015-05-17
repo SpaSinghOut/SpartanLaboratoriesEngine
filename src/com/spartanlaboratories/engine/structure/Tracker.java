@@ -6,8 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public final class Tracker extends StructureObject {
-	int tickRate = Engine.tickRate;
-	private static final int numberOfTrackedEntities = 17;
+	private int tickRate = Engine.tickRate;
+	private double notifyPeriod;
+	private static final int numberOfTrackedEntities = 20;
 	public boolean[] trackedEntities = new boolean[numberOfTrackedEntities];
 	Location[] recordedTimes = new Location[numberOfTrackedEntities];
 	Location[] entityStats = new Location[numberOfTrackedEntities];
@@ -20,12 +21,14 @@ public final class Tracker extends StructureObject {
 	private int secondTracked;
 	public static final int ALG_UNIT_SELECTION = 0, FUNC_TICK = 1, FUNC_RENDER = 2, FUNC_QUADTREE_RESET = 3, FUNC_HERO_OWNER_TICK = 4,
 	FUNC_MAP_TICK = 5, FUNC_MISSILE_TICK = 6, FUNC_AURA_TICK = 7, FUNC_ACTOR_DELETION = 8, REND_MISSILE = 9, REND_MAP = 10, REND_HUMAN = 11, 
-	REND_HEROES = 12, REND_HUMAN_GUI = 13, REND_HUMAN_PORTRAITS = 14, REND_HUMAN_MAP = 15, REND_HUMAN_NUKEPATH = 16;
+	REND_HEROES = 12, REND_HUMAN_GUI = 13, REND_HUMAN_PORTRAITS = 14, REND_HUMAN_MAP = 15, REND_HUMAN_NUKEPATH = 16, RENDMAP_FINDACTORS = 17,
+	RENDMAP_DRAWACTORS = 18, RENDMAP_OTHER = 19;
 	Tracker(Engine engine){
 		super(engine);
+		setNotifyPeriod(15);
 	}
 	public enum TrackerPreset{
-		PRESET_RUN, PRESET_TICK, PRESET_RENDER, PRESET_REND_HUMAN,;
+		PRESET_RUN, PRESET_TICK, PRESET_RENDER, PRESET_REND_HUMAN,PRESET_REND_MAP,;
 	}
 	public void initialize(){
 		try {
@@ -71,16 +74,24 @@ public final class Tracker extends StructureObject {
 			setEntityTracked(REND_HUMAN_MAP, true);
 			setEntityTracked(REND_HUMAN_NUKEPATH, true);
 			break;
+		case PRESET_REND_MAP:
+			setEntityTracked(RENDMAP_FINDACTORS, true);
+			setEntityTracked(RENDMAP_DRAWACTORS, true);
+			setEntityTracked(RENDMAP_OTHER, true);
+			break;
 		}
 		initialize();
+	}
+	public void setNotifyPeriod(int seconds){
+		notifyPeriod = seconds;
 	}
 	private void initEntityNames(){
 		entityNames[0] = "Unit Selection"; entityNames[1] = "Tick"; entityNames[2] = "Render"; entityNames[3] = "Quadtree reset";
 		entityNames[4] = "Hero owner tick"; entityNames[5] = "Map Tick"; 
 		entityNames[9] = "Render Missile"; entityNames[10] = "Render Map"; entityNames[11] = "Render Heroes"; entityNames[12] = "Render Human"; 
 	}
-	public void tick() throws IOException{
-		if(engine.util.everySecond(15)){
+	public void tick(){
+		if(engine.util.everySecond(notifyPeriod)){
 			for(int i = 0; i < numberOfTrackedEntities; i++){
 				if(trackedEntities[i])
 					//displayEntityStats(i);
@@ -125,10 +136,12 @@ public final class Tracker extends StructureObject {
 		System.out.println(" took " + String.format("%.9f", (lifespanStats[entityIdentity].x / ticksTracked)) + " seconds\n" + "which is "
 		+ String.format("%.2f", lifespanStats[entityIdentity].y) + "% of the time appropriated for a single tick");
 	}
-	private void log() throws IOException{
-		if(engine.util.everySecond(1)){
+	private void log(){
+		if(engine.util.everySecond(1))try{
 			writer.write("At Second number " + ++secondTracked + ", " + lifespanStats[FUNC_TICK].x + " seconds were used for the tick function");
 			writer.newLine();
+		}catch(IOException e){
+			System.out.println("There is a problem with the tracker's log() function");
 		}
 	}
 	public void closeWriter(){

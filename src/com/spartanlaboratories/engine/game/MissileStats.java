@@ -14,7 +14,7 @@ import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.SLEXMLException;
 import com.spartanlaboratories.engine.structure.Util;
 
-public class MissileStats{
+class MissileStats{
 	boolean homing;
 	boolean penetrating;
 	double damage;

@@ -63,11 +63,15 @@ public class VisibleObject extends GameObject{
 		textureInfo.updateNeeded = true;
 		textureInfo.textureFormat = format;
 		textureInfo.namePath = pathName;
+		updateTexture();
 		return true;
 	}
 	/**
 	 * Experimental, notify if doesn't work. Attempts to set the texture of this object 
 	 * by using the string that was passed in as the location and name of the file.
+	 * <p>
+	 * Example: if the full name of the file (including the extension) is "test.jpg" and it is inside a folder named "resources" then the string
+	 * that should be passed in as an argument when calling this function should be "resources/test.jpg".
 	 * @param pathName - A String objects that represents the location and name of the texture.
 	 * @return A boolean value that represents whether or not the function succeded at setting the 
 	 * texture.
@@ -76,7 +80,7 @@ public class VisibleObject extends GameObject{
 		if(!pathName.contains("."))return false;
 		String txt = "";
 		for(int i = pathName.indexOf(".");i < pathName.length();)
-			txt += pathName.toCharArray()[i];
+			txt += pathName.toCharArray()[i++];
 		return setTexture(txt, pathName);
 	}
 	/**
@@ -258,16 +262,9 @@ public class VisibleObject extends GameObject{
 	 * @return A boolean that designates if the drawing of this object was successful.
 	 */
 	protected boolean drawMe(Camera camera, float[] RGB){
-		if(textureInfo.updateNeeded)updateTexture();
+		if(textureInfo.updateNeeded || resetTexture)updateTexture();
 		if(camera.canSeeObject(this)){
-			if(resetTexture){
-				try {
-					setTexture();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			engine.util.drawActor(this, RGB, camera);
+			engine.util.drawVO(this, RGB, camera);
 			return true;
 		}
 		return false;
@@ -293,22 +290,26 @@ public class VisibleObject extends GameObject{
 		if(this.getClass() == Hero.class){
 			String heroNameString = ((Hero)this).heroType.toString().toLowerCase();
 			if(heroNameString != "none")
-				texture = TextureLoader.getTexture("JPG", ResourceLoader.getResourceAsStream(Constants.versionString + "/res/" + heroNameString + ".jpg"));
+				setTexture(Constants.versionString + "/res/" + heroNameString + ".jpg");
 		}
 		else if(this.getClass() == Creep.class)
-			texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream(Constants.versionString + "/res/radiant creep.png"));
+			setTexture(Constants.versionString + "/res/radiant creep.png");
 		else if(this.getClass() == Tower.class)
 			if(((Tower)this).faction == Alive.Faction.RADIANT)
-				texture = TextureLoader.getTexture("JPG", ResourceLoader.getResourceAsStream(Constants.versionString + "/res/radiant tower.jpg"));
+				setTexture(Constants.versionString + "/res/radiant tower.jpg");
 			else if(((Tower)this).faction == Alive.Faction.DIRE)
-				texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream(Constants.versionString + "/res/dire tower.png"));
+				setTexture(Constants.versionString + "/res/dire tower.png");
 	}
 	private void updateTexture(){
 		try {
+			if(texture != null)System.out.println(texture.toString());
 			texture = TextureLoader.getTexture(textureInfo.textureFormat, ResourceLoader.getResourceAsStream(textureInfo.namePath));
 		}catch (IOException e) {
 			System.out.println("A texture was set improperly");
 			e.printStackTrace();
+		}finally{
+			resetTexture = false;
+			textureInfo.updateNeeded = false;
 		}
 	}
 }

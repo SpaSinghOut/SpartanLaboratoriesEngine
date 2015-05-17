@@ -360,7 +360,11 @@ public class Gui extends JFrame implements KeyListener{
 			this.abilityButtons.get(3).mouseClicked(new MouseEvent(this, 0,0,0,0,0,0,false));
 			break;
 		case KeyEvent.VK_SPACE:
-			owner.setSelectedUnit(owner.controlledUnits()[0]);
+			try{
+				owner.setSelectedUnit(owner.controlledUnits()[0]);
+			}catch(ArrayIndexOutOfBoundsException e){
+				console.out("Spacebar cannot make the player focus on a unit because the player does not own one");
+			}
 			owner.getPrimaryCamera().worldLocation.setCoords(owner.selectedUnit.getLocation().x, owner.selectedUnit.getLocation().y);
 			break;
 		case KeyEvent.VK_LEFT:

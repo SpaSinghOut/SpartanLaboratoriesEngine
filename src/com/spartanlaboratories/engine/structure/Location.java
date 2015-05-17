@@ -123,7 +123,7 @@ public class Location{
 	 * @param camera the camera that will be viewing this location
 	 * @return this location's coordinates on a screen stored in a new location
 	 */
-	public Location getLocationOnScreen(Camera camera){ 
+	public Location getScreenCoords(Camera camera){ 
 		return new Location(camera.monitorLocation.x - camera.worldLocation.x + x,
 				camera.monitorLocation.y - camera.worldLocation.y + y);
 	}
@@ -160,17 +160,45 @@ public class Location{
 		x -= previousChange.x;
 		y -= previousChange.y;
 	}
+	/**
+	 * Returns the coordinate values of this location formatted into a string. The coordinate values will only contain two digits after the decimal point.
+	 * <p>
+	 * Example: if the coordinate values of this location happen to be 5.286 and 7.291 then this method will return:<br>
+	 * "(5.28,7.29)"
+	 * 
+	 * @return - The string value of this Location
+	 */
 	@Override
 	public String toString(){
-		return "(" + x +"," + y + ")";
+		return String.format("(%.2f,%.2f)", x,y);
 	}
+	/**
+	 * Prints the {@link #toString()} value of this location to standard output.
+	 */
 	public void print(){
 		System.out.println(toString());
 	}
+	/**
+	 * Prints the {@link #toString()} value of this location to the passed in console.
+	 * 
+	 * @param console - The console that will be displaying this location
+	 */
 	public void printTo(Console console){
 		console.out(toString());
 	}
+	/**
+	 * Returns a new Location that has the same coordinate values as this location.
+	 * 
+	 * @return - A copy of this location.
+	 */
 	public Location copy(){
 		return new Location(this);
 	}
+	/**
+	 * Swaps the {@link #x} and {@link #y} values of this location.
+	 */
+	public void swap(){
+		setCoords(y,x);
+	}
+	
 }

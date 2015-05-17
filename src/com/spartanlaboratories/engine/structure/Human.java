@@ -93,9 +93,9 @@ final public class Human extends Controller{
 		portrait.setWidth(gui.screenX * 0.1);
 		portrait.setHeight(gui.screenY * 0.2);
 		portrait.setLocation(gui.screenX * 0.219, gui.screenY * 0.862);
-		try {
+		/*try {
 			portrait.setTexture(TextureLoader.getTexture("jpg", ResourceLoader.getResourceAsStream(Constants.versionString + "/res/iron branch.jpg")));
-		} catch (IOException e){}
+		} catch (IOException e){}*/
 		showMap = false;
 		portrait.active = false;
 	}
@@ -144,10 +144,8 @@ final public class Human extends Controller{
 		}	
 		
 		//the following moves and/or aggros the player using the rightmouseclick
-		if(Mouse.isButtonDown(1)){
-			if(hasControlOf(selectedUnit))
+		if(Mouse.isButtonDown(1)&&hasControlOf(selectedUnit))
 				selectedUnit.rightClick(mouseClickLocation, coveringCamera(mouseClickLocation));
-		}
 	}
 	private Camera coveringCamera(Location locationOnScreen) throws SLEImproperInputException{
 		for(Camera c:cameras)

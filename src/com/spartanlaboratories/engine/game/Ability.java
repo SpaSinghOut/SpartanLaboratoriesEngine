@@ -13,14 +13,22 @@ import com.spartanlaboratories.engine.structure.Human;
 import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.Util;
 
+/**
+ * The Ability class is this engine's prototype and utility class for creating Hero abilities or spells. This class gets its basic information from 
+ * an xml file called Abilities.xml which needs to be defined prior to the usage of this class. 
+ * 
+ * @author Spartak
+ *
+ */
+
 public abstract class Ability implements Castable{
 	public class AbilityStats{
 		int CD;										//The cool down of this ability
 		int manaCost;								//The amount of mana required to use this ability
-		public Util.Color color;					//The main color of this ability
+		Util.Color color;					//The main color of this ability
 		int duration;								//How long this ability lasts
-		public CastType castType;					//The way in which this ability is cast
-		public int[] levelRequirements;				//A list of the hero levels at which this ability can have more points put towards it
+		CastType castType;					//The way in which this ability is cast
+		int[] levelRequirements;				//A list of the hero levels at which this ability can have more points put towards it
 		Ability owner;
 		public String name;
 		AbilityStats(String abilityName) throws XMLStreamException, FileNotFoundException{
@@ -107,7 +115,7 @@ public abstract class Ability implements Castable{
 			owner = ability;
 		}
 	}
-	public enum LevellingType{
+	enum LevellingType{
 		DEFAULT,
 		NORMAL,
 		ULTIMATE,;
@@ -133,15 +141,27 @@ public abstract class Ability implements Castable{
 			return levelRequirements;
 		}
 	}
-	Hero owner; 								//The hero that has this ability
-	int CDRemaining;							//The amount of time remaining until this ability is off of cool down
+	/**
+	 * The Hero that owns this ability.
+	 */
+	public Hero owner;
+	/**
+	 * The amount of time remaining until this ability is once again off of cooldown.
+	 */
+	public int CDRemaining;							//The amount of time remaining until this ability is off of cool down
+	/**
+	 * Describes the current condition of this ability. (is it ready to be cast, is it active or on cooldown, etc.)
+	 */
 	public State state;								//Is the ability ready, on cool down, etc.
-	int durationLeft;							//How much time this ability has left until it ends
+	/**
+	 * The amount of time remaining until this ability is no longer active.
+	 */
+	public int durationLeft;							//How much time this ability has left until it ends
 	private Alive target;						//If this ability targets an Alive what is that target
 	private Location targetLocation;			//and what is that Alive's location
 	public int level;									//The amount of skill points that were put into this ability
-	int castControl;							//Is used to prevent toggle skills from activating multiple times per click/press
-	public AbilityStats abilityStats;
+	private int castControl;							//Is used to prevent toggle skills from activating multiple times per click/press
+	private AbilityStats abilityStats;
 	public Ability(String abilityName, Hero setOwner){
 		owner = setOwner;
 		try {

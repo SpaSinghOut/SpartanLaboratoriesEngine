@@ -66,11 +66,14 @@ public abstract class Map extends StructureObject{
 	public void drawMap(Camera camera){
 		//for(TerrainObject a: terrain)
 			//if(camera.canSeeObject(a))a.drawMe(camera);
+		engine.tracker.giveStartTime(Tracker.RENDMAP_FINDACTORS);
 		ArrayList<VisibleObject> list = 
 				engine.qt.retrieveBox(	camera.worldLocation.x - camera.dimensions.x / 2, 
 										camera.worldLocation.y - camera.dimensions.y / 2,
 										camera.worldLocation.x + camera.dimensions.x / 2,
 										camera.worldLocation.y + camera.dimensions.y / 2 );
+		engine.tracker.giveEndTime(Tracker.RENDMAP_FINDACTORS);
+		engine.tracker.giveStartTime(Tracker.RENDMAP_DRAWACTORS);
 		for(VisibleObject vo: list)
 			if(Actor.class.isAssignableFrom(vo.getClass()))
 			try {
@@ -78,8 +81,11 @@ public abstract class Map extends StructureObject{
 			} catch (NullColorException e) {
 				e.printStackTrace();
 			}
+		engine.tracker.giveEndTime(Tracker.RENDMAP_DRAWACTORS);
+		engine.tracker.giveStartTime(Tracker.RENDMAP_OTHER);
 		drawBorder();
 		if(rune.active)engine.util.drawActor(rune, camera);
+		engine.tracker.giveEndTime(Tracker.RENDMAP_OTHER);
 	}
 	/**
 	 * When invoked goes through the list of all Spawn Points contained by this map and makes each one spawn one unit that it was set to spawn.

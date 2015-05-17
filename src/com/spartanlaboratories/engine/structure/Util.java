@@ -1,6 +1,7 @@
 package com.spartanlaboratories.engine.structure;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.newdawn.slick.opengl.Texture;
 
 import com.spartanlaboratories.engine.game.Actor;
@@ -45,18 +46,36 @@ public class Util extends StructureObject{
 		return false;
 	}
 	public void drawActor(VisibleObject v, Camera camera){
-		drawActor(v, getRGB(v.color), camera);
+		drawVO(v, getRGB(v.color), camera);
 	}
 	public void drawActor(VisibleObject vo, Util.Color color, Camera camera){
-		drawActor(vo, getRGB(color), camera);
+		drawVO(vo, getRGB(color), camera);
 	}
-	final public void drawActor(VisibleObject actor, float[] RGB, Camera camera){
+	final public void drawVO(VisibleObject vo, float[] RGB, Camera camera){
+		boolean hasTexture = setTexture(vo);
+		GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
+		GL11.glBegin(GL11.GL_QUADS);
+		if(!camera.fullyWithinBounds(vo)){
+			drawVOEdge(vo, camera);
+			return;
+		}
+			double x = vo.getLocation().getScreenCoords(camera).x, y = vo.getLocation().getScreenCoords(camera).y;
+			if(hasTexture)GL11.glTexCoord2f(0,0);
+			GL11.glVertex2d(x - vo.getWidth() / 2, y - vo.getHeight() / 2);
+			if(hasTexture)GL11.glTexCoord2f((float)(texture.getWidth()),0);
+			GL11.glVertex2d(x + vo.getWidth() / 2, y - vo.getHeight() / 2);
+			if(hasTexture)GL11.glTexCoord2f((float)(texture.getWidth()),(float)(texture.getHeight()));
+			GL11.glVertex2d(x + vo.getWidth() / 2, y + vo.getHeight() / 2);
+			if(hasTexture)GL11.glTexCoord2f(0,(float)(texture.getHeight()));
+			GL11.glVertex2d(x - vo.getWidth() / 2, y + vo.getHeight() / 2);
+			GL11.glEnd();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+	}
+	final private void drawVOEdge(VisibleObject actor, Camera camera){
 		if(actor.shape == Actor.Shape.QUAD){
-			setTexture(actor);
 			float textureWidth = texture != null ? (float) (texture.getWidth() ) : 1, 
 				  textureHeight = texture != null ? (float) (texture.getHeight() ) : 1;
-			GL11.glBegin(GL11.GL_QUADS);
-			double x = actor.getLocation().getLocationOnScreen(camera).x, y = actor.getLocation().getLocationOnScreen(camera).y;
+			double x = actor.getLocation().getScreenCoords(camera).x, y = actor.getLocation().getScreenCoords(camera).y;
 			boolean bindCheckX, bindCheckY; double trueX, fakeX, trueY, fakeY;
 			double ratioX, ratioY;
 			float xMin, xMax, yMin, yMax;
@@ -92,7 +111,6 @@ public class Util extends StructureObject{
 					!camera.yMinBound(y - actor.getHeight() / 2)?
 						textureHeight:
 						textureHeight / ratioY);
-			GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
 				trueX = x - actor.getWidth() / 2;trueY = y - actor.getHeight() / 2;
 				fakeX = camera.monitorLocation.x - camera.dimensions.x / 2;
 				fakeY = camera.monitorLocation.y - camera.dimensions.y / 2;
@@ -120,10 +138,9 @@ public class Util extends StructureObject{
 			}
 		else if(actor.shape == Actor.Shape.TRI){
 			GL11.glBegin(GL11.GL_TRIANGLES);
-				GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
-				GL11.glVertex2d(actor.getLocation().getLocationOnScreen(camera).x - actor.getWidth() / 2, actor.getLocation().getLocationOnScreen(camera).y - actor.getHeight() / 2);
-				GL11.glVertex2d(actor.getLocation().getLocationOnScreen(camera).x + actor.getWidth() / 2, actor.getLocation().getLocationOnScreen(camera).y - actor.getHeight() / 2);
-				GL11.glVertex2d(actor.getLocation().getLocationOnScreen(camera).x - actor.getWidth() / 2, actor.getLocation().getLocationOnScreen(camera).y + actor.getHeight() / 2);
+				GL11.glVertex2d(actor.getLocation().getScreenCoords(camera).x - actor.getWidth() / 2, actor.getLocation().getScreenCoords(camera).y - actor.getHeight() / 2);
+				GL11.glVertex2d(actor.getLocation().getScreenCoords(camera).x + actor.getWidth() / 2, actor.getLocation().getScreenCoords(camera).y - actor.getHeight() / 2);
+				GL11.glVertex2d(actor.getLocation().getScreenCoords(camera).x - actor.getWidth() / 2, actor.getLocation().getScreenCoords(camera).y + actor.getHeight() / 2);
 			GL11.glEnd();
 		}
 	} 
@@ -325,14 +342,17 @@ public class Util extends StructureObject{
 		return true;
 		return false;
 	}
-	private void setTexture(VisibleObject vo){
-		if(vo.getTextureNE() == null)
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		else {
-			texture = vo.getTextureNE();
-			org.newdawn.slick.Color.white.bind();
+	private boolean setTexture(VisibleObject vo){
+		//System.out.println(texture.getTextureID());
+		Texture newTexture = vo.getTextureNE();
+		if(newTexture == null)return false;
+		//GL13.glActiveTexture(GL13.GL_TEXTURE0);
+		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, GL11.glGenTextures());
+		if(texture == null || !texture.equals(newTexture)){
+			texture = newTexture;
 			texture.bind();
 		}
+		return true;
 	}
 	public void drawOnMap(Human player, Actor actor){
 		Location savedLocation = new Location(actor.getLocation().x, actor.getLocation().y);							//save actor location

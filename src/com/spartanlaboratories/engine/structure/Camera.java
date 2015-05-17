@@ -75,7 +75,8 @@ public class Camera extends StructureObject{
 		additionalSpeed = 0;
 	}
 	/**
-	 * Checks whether the camera is able to see the given object
+	 * Checks whether the camera is able to see the given object. Identical to {@link #withinBounds(VisibleObject)}.
+	 * 
 	 * @param vo - The <a href="VisibleObject.html">Visible Object</a> the visibility of which is being tested
 	 * @return a boolean value which represents the object's visibility
 	 */
@@ -88,7 +89,41 @@ public class Camera extends StructureObject{
 		boolean 
 		xmintest = vxmax > wx - dx / 2, xmaxtest = vxmin < wx + dx / 2, 
 		ymintest = vymax > wy - dy / 2, ymaxtest = vymin < wy + dy / 2;
-		return xmintest&&xmaxtest&&ymintest&&ymaxtest;
+		return xmintest||xmaxtest||ymintest||ymaxtest;
+	}
+	/**
+	 * Returns whether or not the parameter is completely covered by the view of this camera.
+	 * 
+	 * @param vo - The parameter the visibility of which is being tested.
+	 * @return {@code true} if all of the passed in visible object is visible.
+	 * 	<br> {@code false} if any part of the passed in visible object is not visible.
+	 */
+	public boolean fullyWithinBounds(VisibleObject vo){
+		Location loc = vo.getLocation().getScreenCoords(this);
+		double x = loc.x, y = loc.y;
+		return xMinBound(x - vo.getWidth() / 2)
+				&& xMaxBound(x + vo.getWidth() / 2)
+				&& yMinBound(y - vo.getWidth() / 2)
+				&& yMaxBound(y + vo.getWidth() / 2)
+				;
+	}
+	/**
+	 * Checks if any part of the passed in object is within the bounds of this camera. Should be identical 
+	 * in functionality to {@link #canSeeObject(VisibleObject)}. The difference is this method uses the parameter's location on screen rather than the 
+	 * real world location. This method provides an alternate way of checking the visibility of an object and should be used in case the algorith in 
+	 * {@link #canSeeObject(VisibleObject)} is broken.
+	 * 
+	 * @param vo - The {@link VisibleObject} whose presence within the borders of this camera is being tested.
+	 * @return - A boolean value that represents whether or not this the passed in object is within borders.
+	 */
+	public boolean withinBounds(VisibleObject vo){
+		Location loc = vo.getLocation().getScreenCoords(this);
+		double x = loc.x, y = loc.y;
+		return xMinBound(x + vo.getWidth() / 2)
+				|| xMaxBound(x - vo.getWidth() / 2)
+				|| yMinBound(y + vo.getWidth() / 2)
+				|| yMaxBound(y - vo.getWidth() / 2)
+				;
 	}
 	public boolean withinBounds(Location l){
 		return xBound(l.x)&&yBound(l.y);

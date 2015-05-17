@@ -80,20 +80,6 @@ public class Engine{
 			scanAndSetResolution();
 			break;
 		}
-		try {
-			Display.setDisplayMode(new DisplayMode((int)xDisplay,(int)yDisplay));
-			Display.create();
-			Display.setVSyncEnabled(true);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-			GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-			GL11.glEnable(GL11.GL_BLEND);
-        	GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL11.glLoadIdentity();
-			GL11.glOrtho(0, (int)xDisplay, (int)yDisplay, 0, 1, -1);
-		} catch (LWJGLException e) {
-		} 
 	}
 	class InitializationThread implements Runnable{
 		public void run(){
@@ -137,8 +123,23 @@ public class Engine{
 	public void init(){
 		tickRate = 60;
 		tracker = new Tracker(this);
-		tracker.initialize();
 		SLEXMLException.engine = this;
+		try {
+			Display.setDisplayMode(new DisplayMode((int)xDisplay,(int)yDisplay));
+			Display.create();
+			Display.setVSyncEnabled(true);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+			GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			GL11.glEnable(GL11.GL_BLEND);
+	        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			GL11.glMatrixMode(GL11.GL_MODELVIEW);
+			GL11.glMatrixMode(GL11.GL_PROJECTION);
+			GL11.glLoadIdentity();
+			GL11.glOrtho(0, (int)xDisplay, (int)yDisplay, 0, 1, -1);
+		} catch (LWJGLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		map = (Map) typeHandler.typeGetter.get("map");
 		map.init();
 		tickCount = 0;
@@ -203,12 +204,7 @@ public class Engine{
 		if(tracker.trackedEntities[Tracker.FUNC_ACTOR_DELETION])tracker.giveStartTime(Tracker.FUNC_ACTOR_DELETION);
 		deleteStuff();
 		if(tracker.trackedEntities[Tracker.FUNC_ACTOR_DELETION])tracker.giveEndTime(Tracker.FUNC_ACTOR_DELETION);
-		try {
-			tracker.tick();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		tracker.tick();
 		if(tracker.trackedEntities[Tracker.FUNC_TICK])tracker.giveEndTime(Tracker.FUNC_TICK);
 	}	
 	private void render(){
