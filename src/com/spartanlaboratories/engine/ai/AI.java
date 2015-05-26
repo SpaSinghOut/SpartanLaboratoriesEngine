@@ -8,7 +8,7 @@ import com.spartanlaboratories.engine.game.Alive.Faction;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Controller;
 import com.spartanlaboratories.engine.structure.Engine;
-import com.spartanlaboratories.engine.structure.Location;
+import com.spartanlaboratories.engine.util.Location;
 
 /**
  * Don't use.

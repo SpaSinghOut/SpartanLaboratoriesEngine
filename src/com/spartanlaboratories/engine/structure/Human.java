@@ -15,6 +15,7 @@ import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.game.Alive.Faction;
 import com.spartanlaboratories.engine.structure.Util.Color;
 import com.spartanlaboratories.engine.ui.Gui;
+import com.spartanlaboratories.engine.util.Location;
 /**
  * A human version of a unit controller
  * @author spart_000
@@ -26,7 +27,7 @@ final public class Human extends Controller{
 	static int abilityButtonWidth = 50;
 	static Location[] abilityButtonLocations = new Location[3];
 	//declaring the camera and the camera's speed attribute
-	ArrayList<Camera> cameras = new ArrayList<Camera>();
+	ArrayList<StandardCamera> cameras = new ArrayList<StandardCamera>();
 	int rightClickMove;
 	/**
 	 * Sets the selected unit to the one passed in. Game mechanics and graphic user interface elements that require a target will reference this unit.
@@ -71,7 +72,7 @@ final public class Human extends Controller{
 	 */
 	public Human(Engine engine, Alive.Faction setFaction){
 		super(engine, setFaction);
-		cameras.add(new Camera(engine, new Location(500,500)));
+		cameras.add(new StandardCamera(engine, new Location(500,500)));
 		for(int i = 0; i < 3; i++){
 			int length = abilityButtonLocations.length;
 			abilityButtonLocations[i] = new Location(
@@ -110,57 +111,6 @@ final public class Human extends Controller{
 		gui.tick();
 	}
 	private int preventInputOverflow;
-	private void listenForInput() throws SLEImproperInputException{
-		for(Camera camera: cameras)if(camera.edgePanRules.panOn)edgePan(camera);
-		//START UNIT SELECTION
-		if(engine.tracker.trackedEntities[Tracker.ALG_UNIT_SELECTION])engine.tracker.giveStartTime(Tracker.ALG_UNIT_SELECTION);
-		/*checks if the left mouse button is pressed down and attempts to find a unit under the mouse and set that as the selected unit
-		 */
-		Location mouseClickLocation = new Location(Mouse.getX(), Mouse.getY());//declares the location which the mouse is at
-		if(Mouse.isButtonDown(0)&&--preventInputOverflow<=0){
-			checkForMapClick(mouseClickLocation);
-			Actor clicked = selected(mouseClickLocation);
-			gui.clearInterface();
-			portrait.active = false; 
-			if(clicked != null){
-				if(selectedUnit!=null)selectedUnit.resetTexture = false;
-				setSelectedUnit(clicked);
-				selectedUnit.resetTexture = true;
-				preventInputOverflow = engine.tickRate / 6;
-			}
-			
-			if(engine.tracker.trackedEntities[Tracker.ALG_UNIT_SELECTION])engine.tracker.giveEndTime(Tracker.ALG_UNIT_SELECTION);
-		//END UNIT SELECTION
-			/* There are two main reasons for checking if leftClickState is set to ability use 
-			 * 1. to make sure that the player's click only signifies an ability cast if the player has chosen to cast an ability
-			 * 2. to make sure that after an ability has been cast it does not get cast again because the player is still holding down the button
-			 */
-			if(leftClickState == LeftClickState.ABILITYUSE){
-				Hero caster = (Hero)selectedUnit;
-				gui.out("hero, " + caster.heroType + ", casts spell: " + selectedAbility.abilityStats);
-				caster.castSpell(selectedAbility);
-			}
-			leftClickState = LeftClickState.DEFAULT;
-		}	
-		
-		//the following moves and/or aggros the player using the rightmouseclick
-		if(Mouse.isButtonDown(1)&&hasControlOf(selectedUnit))
-				selectedUnit.rightClick(mouseClickLocation, coveringCamera(mouseClickLocation));
-	}
-	private Camera coveringCamera(Location locationOnScreen) throws SLEImproperInputException{
-		for(Camera c:cameras)
-			if(c.withinBounds(locationOnScreen))return c;
-		throw new SLEImproperInputException(engine.tracker, "The Human type unit controller: " + engine.controllers.indexOf(this)
-				+ " attempted a world based mouse action that was outside of the scope of any camera.");
-	}
-	private void checkForMapClick(Location mouseClickLocation){
-		if(mouseClickLocation.x < mapBackground.getLocation().x + mapBackground.getWidth() / 2 
-		&& mouseClickLocation.x > mapBackground.getLocation().x - mapBackground.getWidth() / 2 
-		&&engine.getScreenDimensions().y - mouseClickLocation.y > mapBackground.getLocation().y - mapBackground.getHeight() / 2
-		&&engine.getScreenDimensions().y - mouseClickLocation.y < mapBackground.getLocation().y + mapBackground.getHeight() / 2)
-			getPrimaryCamera().worldLocation.setCoords((mouseClickLocation.x - (mapBackground.getLocation().x - mapBackground.getWidth() / 2)) / (mapBackground.getWidth()) * engine.getWrap().x,
-			(engine.getScreenDimensions().y - mouseClickLocation.y - (mapBackground.getLocation().y - mapBackground.getHeight() / 2)) / (mapBackground.getHeight()) * engine.getWrap().y);
-	}
 	public Actor selected(Location clicked){
 		final int searchRange = 100;
 		Location b = new Location(0, 0);
@@ -170,11 +120,9 @@ final public class Human extends Controller{
 			engine.tracker.printAndLog("selected() was called to search outside the scope of any camera and abandoned");
 			return null;
 		}
-		for(VisibleObject a : engine.qt.retrieveBox(b.x - searchRange, b.y - searchRange, b.x + searchRange, b.y + searchRange)){
-			if(!a.equals(selectedUnit) && Actor.class.isAssignableFrom(a.getClass()) && engine.util.checkPointCollision(a, b)){
+		for(VisibleObject a : engine.qt.retrieveBox(b.x - searchRange, b.y - searchRange, b.x + searchRange, b.y + searchRange))
+			if(Actor.class.isAssignableFrom(a.getClass()) && engine.util.checkPointCollision(a, b))
 				return (Actor)(a);
-			}
-		}
 		return null;
 	}
 	/**
@@ -186,7 +134,7 @@ final public class Human extends Controller{
 		DEFAULT, ABILITYUSE, ABILITYTAKE,;
 	}
 	
-	public void drawMe(Camera camera) {
+	public void drawMe(StandardCamera camera) {
 		engine.tracker.giveStartTime(Tracker.REND_HUMAN_GUI);
 		gui.render();
 		engine.tracker.giveEndTime(Tracker.REND_HUMAN_GUI);
@@ -217,7 +165,7 @@ final public class Human extends Controller{
 		return new Location(Mouse.getX(), Mouse.getY());
 	}
 	/**
-	 * Returns the location in the "real world" to which the mouse cursor is pointing. Since it does not take in a Camera object as an argument it assumes
+	 * Returns the location in the "real world" to which the mouse cursor is pointing. Since it does not take in a StandardCamera object as an argument it assumes
 	 * that the cursor location is within the scope of a camera contained by this Human's list of owned cameras. Therefore it is possible that this method will
 	 * act out and throw an exception if the engine user is not using the default camera implementation. (if no actions are taken with the cameras list then
 	 * it is very unlikely that this method will throw an exception as the entire display is covered by the default camera.)
@@ -227,11 +175,81 @@ final public class Human extends Controller{
 	public Location getMouseInWorld() throws SLEImproperInputException{
 		return new Location(getMouseLocation(), coveringCamera(getMouseLocation()));
 	}
+	/**
+	 * Returns the first camera is this Human's list of cameras
+	 * @return A camera object that is the first in this Human's list of camera objects
+	 */
+	public StandardCamera getPrimaryCamera() {
+		return cameras.get(0);
+	}
+	/**
+	 * Binds the passed in camera object to be this Human's primary StandardCamera. Does NOT save the old camera. Does reference and not duplicate the passed in camera.
+	 * @param camera the camera that will become this Human's  primary StandardCamera.
+	 * @param index - the location in the list of cameras at which this camera is to be placed
+	 */
+	public void setCamera(int index, StandardCamera camera) {
+		if(index < cameras.size())
+			cameras.set(index, camera);
+		else 
+			cameras.add(camera);
+	}
+	public boolean hasControlOf(Actor o){
+		return controlledUnits.contains(o)&&o!=null;
+	}
+	private void listenForInput() throws SLEImproperInputException{
+		for(StandardCamera camera: cameras)if(camera.edgePanRules.panOn)edgePan(camera);
+		//START UNIT SELECTION
+		if(engine.tracker.trackedEntities[Tracker.ALG_UNIT_SELECTION])engine.tracker.giveStartTime(Tracker.ALG_UNIT_SELECTION);
+		/*checks if the left mouse button is pressed down and attempts to find a unit under the mouse and set that as the selected unit
+		 */
+		Location mouseClickLocation = new Location(Mouse.getX(), Mouse.getY());//declares the location which the mouse is at
+		if(Mouse.isButtonDown(0)&&--preventInputOverflow<=0){
+			Actor clicked = selected(mouseClickLocation);
+			gui.clearInterface();
+			portrait.active = false; 
+			if(clicked != null){
+				if(selectedUnit!=null)selectedUnit.resetTexture = false;
+				setSelectedUnit(clicked);
+				selectedUnit.resetTexture = true;
+				preventInputOverflow = engine.tickRate / 6;
+			}
+			
+			if(engine.tracker.trackedEntities[Tracker.ALG_UNIT_SELECTION])engine.tracker.giveEndTime(Tracker.ALG_UNIT_SELECTION);
+		//END UNIT SELECTION
+			/* There are two main reasons for checking if leftClickState is set to ability use 
+			 * 1. to make sure that the player's click only signifies an ability cast if the player has chosen to cast an ability
+			 * 2. to make sure that after an ability has been cast it does not get cast again because the player is still holding down the button
+			 */
+			if(leftClickState == LeftClickState.ABILITYUSE){
+				Hero caster = (Hero)selectedUnit;
+				caster.castSpell(selectedAbility);
+			}
+			leftClickState = LeftClickState.DEFAULT;
+		}	
+		
+		//the following moves and/or aggros the player using the rightmouseclick
+		if(Mouse.isButtonDown(1)&&hasControlOf(selectedUnit))
+				selectedUnit.rightClick(mouseClickLocation, coveringCamera(mouseClickLocation));
+	}
+	private StandardCamera coveringCamera(Location locationOnScreen) throws SLEImproperInputException{
+		for(StandardCamera c:cameras)
+			if(c.withinBounds(locationOnScreen))return c;
+		throw new SLEImproperInputException(engine.tracker, "The Human type unit controller: " + engine.controllers.indexOf(this)
+				+ " attempted a world based mouse action that was outside of the scope of any camera.");
+	}
+	private void checkForMapClick(Location mouseClickLocation){
+		if(mouseClickLocation.x < mapBackground.getLocation().x + mapBackground.getWidth() / 2 
+		&& mouseClickLocation.x > mapBackground.getLocation().x - mapBackground.getWidth() / 2 
+		&&engine.getScreenDimensions().y - mouseClickLocation.y > mapBackground.getLocation().y - mapBackground.getHeight() / 2
+		&&engine.getScreenDimensions().y - mouseClickLocation.y < mapBackground.getLocation().y + mapBackground.getHeight() / 2)
+			getPrimaryCamera().worldLocation.setCoords((mouseClickLocation.x - (mapBackground.getLocation().x - mapBackground.getWidth() / 2)) / (mapBackground.getWidth()) * engine.getWrap().x,
+			(engine.getScreenDimensions().y - mouseClickLocation.y - (mapBackground.getLocation().y - mapBackground.getHeight() / 2)) / (mapBackground.getHeight()) * engine.getWrap().y);
+	}
 	/*
-	 * An extension of the mouse listener that governs over the position of the Human's Camera and where it is located by moving it in a 
+	 * An extension of the mouse listener that governs over the position of the Human's StandardCamera and where it is located by moving it in a 
 	 * direction based on the location of the cursor on the screen
 	 */
-	private void edgePan(Camera camera){
+	private void edgePan(StandardCamera camera){
 		int edgePanningRange = camera.edgePanRules.panningRange;
 		int speed = camera.getCameraSpeed();
 		if(Mouse.getX() < edgePanningRange)camera.worldLocation.changeX(speed);
@@ -241,26 +259,5 @@ final public class Human extends Controller{
 		if(Mouse.getX() > edgePanningRange && Mouse.getX() < engine.getScreenDimensions().x - edgePanningRange &&
 			Mouse.getY() > edgePanningRange && Mouse.getY() < engine.getScreenDimensions().y - edgePanningRange)
 			camera.resetCameraSpeed();
-	}
-	/**
-	 * Returns the first camera is this Human's list of cameras
-	 * @return A camera object that is the first in this Human's list of camera objects
-	 */
-	public Camera getPrimaryCamera() {
-		return cameras.get(0);
-	}
-	/**
-	 * Binds the passed in camera object to be this Human's primary Camera. Does NOT save the old camera. Does reference and not duplicate the passed in camera.
-	 * @param camera the camera that will become this Human's  primary Camera.
-	 * @param index - the location in the list of cameras at which this camera is to be placed
-	 */
-	public void setCamera(int index, Camera camera) {
-		if(index < cameras.size())
-			cameras.set(index, camera);
-		else 
-			cameras.add(camera);
-	}
-	public boolean hasControlOf(Actor o){
-		return controlledUnits.contains(o)&&o!=null;
 	}
 }

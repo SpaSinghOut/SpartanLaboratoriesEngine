@@ -11,6 +11,7 @@ import com.spartanlaboratories.engine.game.TerrainObject;
 import com.spartanlaboratories.engine.game.Tower;
 import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.structure.Util.NullColorException;
+import com.spartanlaboratories.engine.util.Location;
 
 public abstract class Map extends StructureObject{
 	/**
@@ -63,7 +64,7 @@ public abstract class Map extends StructureObject{
 	 * Draws every actor that is covered by the passed in camera. Also draws the border and the rune.
 	 * @param camera - The camera that is viewing the objects that are going to be drawn.
 	 */
-	public void drawMap(Camera camera){
+	public void drawMap(StandardCamera camera){
 		//for(TerrainObject a: terrain)
 			//if(camera.canSeeObject(a))a.drawMe(camera);
 		engine.tracker.giveStartTime(Tracker.RENDMAP_FINDACTORS);
@@ -106,7 +107,6 @@ public abstract class Map extends StructureObject{
 		spawnPoints.add(new SpawnPoint(location, new Creep(engine, faction)));
 	}
 	/**
-	 * final protected void addCreepMovePoint(Alive.Faction faction, int ruleSet, Location location)</code><br><br>
 	 * Creates a new Location that designates a specific movePoint in a ruleset
 	 * @param faction The faction of the creeps that are to be using this move point
 	 * @param ruleSet The set under which this point is to be placed

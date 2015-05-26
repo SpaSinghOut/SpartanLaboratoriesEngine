@@ -1,6 +1,6 @@
 package com.spartanlaboratories.engine.game;
 
-import com.spartanlaboratories.engine.structure.Location;
+import com.spartanlaboratories.engine.util.Location;
 
 public class Missile extends Actor{
 	double damage;

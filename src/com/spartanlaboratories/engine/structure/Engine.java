@@ -18,6 +18,7 @@ import com.spartanlaboratories.engine.game.GameObject;
 import com.spartanlaboratories.engine.game.Missile;
 import com.spartanlaboratories.engine.game.Tower;
 import com.spartanlaboratories.engine.game.VisibleObject;
+import com.spartanlaboratories.engine.util.Location;
 
 /**
  * The Spartan Laboratories Game Engine
@@ -31,6 +32,7 @@ public class Engine{
 	 * Manual modification of this is best  avoided as even if this was used to terminate the program it would not terminate correctly.
 	 */
 	public boolean running;
+	public boolean ambientUpdate;
 	public boolean concurrency;
 	public final int heroPickSecondDelay = 0;
 	public ArrayList<Controller> controllers = new ArrayList<Controller>();
@@ -122,6 +124,7 @@ public class Engine{
 	}
 	public void init(){
 		tickRate = 60;
+		ambientUpdate = false;
 		tracker = new Tracker(this);
 		SLEXMLException.engine = this;
 		try {
@@ -185,6 +188,7 @@ public class Engine{
 		
 	}
 	private void tick(){
+		for(GameObject g: GameObject.gameObjects)g.ticked = false;
 		if(tracker.trackedEntities[Tracker.FUNC_TICK])tracker.giveStartTime(Tracker.FUNC_TICK);
 		if(tracker.trackedEntities[Tracker.FUNC_QUADTREE_RESET])tracker.giveStartTime(Tracker.FUNC_QUADTREE_RESET);
 		qt.clear();
@@ -206,6 +210,7 @@ public class Engine{
 		if(tracker.trackedEntities[Tracker.FUNC_ACTOR_DELETION])tracker.giveEndTime(Tracker.FUNC_ACTOR_DELETION);
 		tracker.tick();
 		if(tracker.trackedEntities[Tracker.FUNC_TICK])tracker.giveEndTime(Tracker.FUNC_TICK);
+		if(ambientUpdate)for(GameObject g: GameObject.gameObjects)if(!g.ticked)g.tick();
 	}	
 	private void render(){
 		//System.out.println("render test");
@@ -241,7 +246,7 @@ public class Engine{
 	private void tickAuras(){
 		for(Aura a: Aura.auras)a.tick();
 	}
-	private void drawSpells(Camera camera){
+	private void drawSpells(StandardCamera camera){
 		for(Missile missile : missiles){
 			util.drawActor(missile, missile.color, camera);	
 		}

@@ -8,8 +8,8 @@ import javax.swing.JTextField;
 import com.spartanlaboratories.engine.structure.Console;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
-import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.ObsoleteCommandException;
+import com.spartanlaboratories.engine.util.Location;
 
 public class GraphicalConsole extends Console implements MouseListener{
 	JTextField consoleInput;
@@ -58,6 +58,7 @@ public class GraphicalConsole extends Console implements MouseListener{
 	public void mousePressed(MouseEvent arg0) {}
 	public void mouseReleased(MouseEvent arg0) {}
 	public void out(String string){
+		if(parallelPrinting)super.out(string);
 		gui.out(string);
 	}
 }

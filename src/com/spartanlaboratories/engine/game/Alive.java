@@ -2,13 +2,13 @@ package com.spartanlaboratories.engine.game;
 
 import java.util.ArrayList;
 
-import com.spartanlaboratories.engine.structure.Camera;
+import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.Human;
-import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.Util;
 import com.spartanlaboratories.engine.structure.Util.NullColorException;
+import com.spartanlaboratories.engine.util.Location;
 
 public class Alive extends Actor{
 	static int experienceRange = 650;
@@ -345,7 +345,7 @@ public class Alive extends Actor{
 		return 0.0f;
 	}
 	@Override
-	protected boolean drawMe(Camera camera, float[] RGB){
+	protected boolean drawMe(StandardCamera camera, float[] RGB){
 		if(!super.drawMe(camera, RGB) || !alive)return false;
 		try {
 			healthBar.drawMe(camera);
@@ -357,7 +357,7 @@ public class Alive extends Actor{
 	/**
 	 * Makes this Alive consider the passed in Alive as its attack target. Will change the alive's attack state to selected.
 	 * Might trigger buffs.
-	 * @param setTarget
+	 * @param setTarget - The Alive that will become the attack target of this Alive
 	 */
 	public void aggroOn(Alive setTarget){
 		if(setTarget == attackTarget)return;
@@ -431,9 +431,10 @@ public class Alive extends Actor{
 		healthBar.setHeight((int)(height * .25));
 	}
 	protected void updateComponentLocation(){
-		healthBar.setLocation(new Location(
+		super.updateComponentLocation();
+		healthBar.setLocation(
 				getLocation().x - getWidth() / 2 + getRatio("health") * getWidth() / 2,
-				getLocation().y - getHeight() / 2 - healthBar.getHeight() / 2));
+				getLocation().y - getHeight() / 2 - healthBar.getHeight() / 2);
 	}
 	public void goTo(Location setTarget){
 		super.goTo(setTarget);
@@ -446,7 +447,6 @@ public class Alive extends Actor{
 	public Alive copy(){
 		Alive a = new Alive(engine, faction);
 		copyTo(a);
-		a.stats = stats;
 		return a;
 	}
 	protected void copyTo(Alive a){
@@ -467,7 +467,7 @@ public class Alive extends Actor{
 		a.stats = new double[stats.length];
 		for(int i = 0; i < stats.length; i++)a.stats[i] = stats[i];
 	}
-	public void rightClick(Location locationOnScreen, Camera camera){
+	public void rightClick(Location locationOnScreen, StandardCamera camera){
 		Human owner = (Human)this.owner;
 		Actor selected = owner.selected(locationOnScreen);
 		Alive targetedUnit = (Alive) (selected==null?null:Alive.class.isAssignableFrom(selected.getClass())?selected:null);

@@ -7,12 +7,14 @@ import com.spartanlaboratories.engine.game.Ability;
 import com.spartanlaboratories.engine.game.Actor;
 import com.spartanlaboratories.engine.game.GameObject;
 import com.spartanlaboratories.engine.game.VisibleObject;
+import com.spartanlaboratories.engine.util.Location;
 
-public class Console extends StructureObject{;
+public class Console extends StructureObject{
+	public boolean parallelPrinting;
+	public Executer executer;
 	String[] commandNames;
 	Human owner;
 	Parser parser;
-	public Executer executer;
 	Actor self, underMouse, considered, actionReceiver;
 	ArrayList<Actor> inMind = new ArrayList<Actor>();
 	protected int execution;
@@ -41,7 +43,7 @@ public class Console extends StructureObject{;
 	/**
 	 * Prints the passed in location.
 	 * 
-	 * @param location
+	 * @param location - The Location that is going to be shown.
 	 */
 	public void showLocation(Location location){
 		out("(" + location.x +"," + location.y + ")");
@@ -82,8 +84,8 @@ public class Console extends StructureObject{;
 	
 	/**
 	 * Obsolete, deprecated, likely to throw, and even more likely to cause an error.
-	 * @param string
-	 * @throws ObsoleteCommandException
+	 * @param string - The raw command string
+	 * @throws ObsoleteCommandException - If the command is no longer supported
 	 */
 	final protected void oldTakeCommand(String string) throws ObsoleteCommandException{
 		try{

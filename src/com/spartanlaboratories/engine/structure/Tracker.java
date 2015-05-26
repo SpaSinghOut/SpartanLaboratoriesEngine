@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import com.spartanlaboratories.engine.util.Location;
+
 public final class Tracker extends StructureObject {
 	private int tickRate = Engine.tickRate;
 	private double notifyPeriod;

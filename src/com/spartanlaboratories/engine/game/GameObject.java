@@ -3,8 +3,8 @@ package com.spartanlaboratories.engine.game;
 import java.util.ArrayList;
 
 import com.spartanlaboratories.engine.structure.Engine;
-import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.StructureObject;
+import com.spartanlaboratories.engine.util.Location;
 /**
  * One of the most basic of the engines object frameworks. Can be active or inactive, exists in the world, and can own other game objects.
  * @author Spartak
@@ -16,6 +16,8 @@ public abstract class GameObject extends StructureObject{
 	 * While this may vary between subclasses an object that is set to be inactive will most likely be deleted. Set to true on creation.
 	 */
 	public boolean active;
+	public static ArrayList<GameObject> gameObjects = new ArrayList<GameObject>();
+	public boolean ticked;
 	private Location location;
 	/**
 	 * A list of other game objects that this game object owns.
@@ -29,13 +31,16 @@ public abstract class GameObject extends StructureObject{
 		super(setEngine);
 		active = true;
 		location = new Location();
+		gameObjects.add(this);
 	}
 	/**
-	 * Performs one update on the state of this game object.
+	 * Performs one update on the state of this game object. This method is called systematically by the engine and therefore it would be bad practice to 
+	 * call the method externally.
 	 * @return whether or not this object is active
 	 */
-	boolean tick(){
+	public boolean tick(){
 		update();
+		ticked = true;
 		return active;
 	}
 	/**

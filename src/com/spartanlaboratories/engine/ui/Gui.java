@@ -13,7 +13,7 @@ import com.spartanlaboratories.engine.game.Hero;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.Human;
-import com.spartanlaboratories.engine.structure.Location;
+import com.spartanlaboratories.engine.util.Location;
 
 import java.awt.Component;
 import java.awt.Font;
@@ -76,7 +76,7 @@ public class Gui extends JFrame implements KeyListener{
 		initHUD();
 	}
 	/**
-	 * <ul><b>initShop</b><p><code>final protected void initShop</code><p>Sets default parameters for the items shop and adds it the the
+	 * Sets default parameters for the items shop and adds it the the
 	 * HUD. Is only to be called after the shop has been initialized, otherwise it will throw a null pointer exception.
 	 */
 	final protected void initShop(){

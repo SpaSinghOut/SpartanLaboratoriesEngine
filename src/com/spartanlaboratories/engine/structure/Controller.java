@@ -43,7 +43,7 @@ public class Controller extends StructureObject{
 	 * Draws this controller's hero
 	 * @param camera that camera that is viewing this object
 	 */
-	public void drawMe(Camera camera){
+	public void drawMe(StandardCamera camera){
 		
 	}
 	/**

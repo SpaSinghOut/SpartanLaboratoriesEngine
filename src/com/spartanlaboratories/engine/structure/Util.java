@@ -8,6 +8,7 @@ import com.spartanlaboratories.engine.game.Actor;
 import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.Missile;
 import com.spartanlaboratories.engine.game.VisibleObject;
+import com.spartanlaboratories.engine.util.Location;
 /**
  * <b> The Engine's Utility Class </b>
  * <p>
@@ -45,13 +46,13 @@ public class Util extends StructureObject{
 		}
 		return false;
 	}
-	public void drawActor(VisibleObject v, Camera camera){
+	public void drawActor(VisibleObject v, StandardCamera camera){
 		drawVO(v, getRGB(v.color), camera);
 	}
-	public void drawActor(VisibleObject vo, Util.Color color, Camera camera){
+	public void drawActor(VisibleObject vo, Util.Color color, StandardCamera camera){
 		drawVO(vo, getRGB(color), camera);
 	}
-	final public void drawVO(VisibleObject vo, float[] RGB, Camera camera){
+	final public void drawVO(VisibleObject vo, float[] RGB, StandardCamera camera){
 		boolean hasTexture = setTexture(vo);
 		GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
 		GL11.glBegin(GL11.GL_QUADS);
@@ -71,7 +72,7 @@ public class Util extends StructureObject{
 			GL11.glEnd();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
-	final private void drawVOEdge(VisibleObject actor, Camera camera){
+	final private void drawVOEdge(VisibleObject actor, StandardCamera camera){
 		if(actor.shape == Actor.Shape.QUAD){
 			float textureWidth = texture != null ? (float) (texture.getWidth() ) : 1, 
 				  textureHeight = texture != null ? (float) (texture.getHeight() ) : 1;

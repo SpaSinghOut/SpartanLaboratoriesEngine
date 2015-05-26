@@ -1,6 +1,8 @@
 package com.spartanlaboratories.engine.structure;
 
+import com.spartanlaboratories.engine.game.Ability;
 import com.spartanlaboratories.engine.game.Alive;
+import com.spartanlaboratories.engine.game.Hero;
 import com.spartanlaboratories.engine.structure.Util.NullColorException;
 
 class UnitTest extends Map{
@@ -21,21 +23,14 @@ class UnitTest extends Map{
 		engine.tracker.initialize(Tracker.TrackerPreset.PRESET_REND_MAP);
 		// TODO Auto-generated method stub
 		Human human = new Human(engine, Alive.Faction.RADIANT);
-		Alive unit = new Alive(human.engine, human.faction);
+		Alive unit = new Hero<Spell>(engine, Hero.HeroType.RAZOR, human);
 		unit.setWidth(60);
 		unit.setHeight(60);
 		unit.changeBaseSpeed(300);
 		unit.color = Util.Color.WHITE;
-		unit.setTexture("test.png");
-		unit.setLocation(unit.getLocation());
-		Alive unit2 = new Alive(human.engine, human.faction);
-		unit2.setWidth(60);
-		unit2.setHeight(60);
-		unit2.changeBaseSpeed(300);
-		unit2.color = Util.Color.WHITE;
-		unit2.setLocation(300,0);
-		unit2.setTexture("test.png");
-		human.addUnit(unit2);
+		//unit.setTexture("test.png");
+		unit.setLocation(0,0);
+		human.addUnit(unit);
 		human.getPrimaryCamera().worldLocation.setCoords(0,0);
 		
 		Console console = human.gui.console;
@@ -44,7 +39,7 @@ class UnitTest extends Map{
 		
 	}
 	/*@Override
-	public void drawMap(Camera camera){
+	public void drawMap(StandardCamera camera){
 		try {
 			System.out.println(Alive.allAlives.get(0).drawMe(camera));
 		} catch (NullColorException e) {
@@ -70,4 +65,18 @@ class UnitTest extends Map{
 		engine.init();
 		engine.start();
 	}
+}
+class Spell extends Ability{
+
+	public Spell(String abilityName, Hero setOwner) {
+		super(abilityName, setOwner);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void cast() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

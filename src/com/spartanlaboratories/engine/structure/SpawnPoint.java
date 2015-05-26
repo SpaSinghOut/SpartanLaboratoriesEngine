@@ -1,6 +1,7 @@
 package com.spartanlaboratories.engine.structure;
 
 import com.spartanlaboratories.engine.game.GameObject;
+import com.spartanlaboratories.engine.util.Location;
 
 public class SpawnPoint extends Location{
 	private GameObject spawns;	

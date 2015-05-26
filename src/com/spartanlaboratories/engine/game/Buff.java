@@ -2,12 +2,11 @@ package com.spartanlaboratories.engine.game;
 
 import java.util.ArrayList;
 
-import com.spartanlaboratories.engine.structure.Camera;
+import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Human;
 import com.spartanlaboratories.engine.ui.BuffIcon;
 
 /**
- * <ul><b>Buff</b><p><code>&#8195;public class Buff extends GameObject</code><p>
  * An object that is to be contained inside an <a href="Alive.html">Alive's</a> <a href="Alive.buffs.html">buffs</a> list, it handles all of the 
  * temporary and permanent stat changes and special effects of an Alive object.
  * @author Spartak
@@ -84,7 +83,7 @@ public abstract class Buff extends GameObject{
 	}
 	private void triggerConfig(){
 	}
-	final boolean tick(){
+	public final boolean tick(){
 		if(onMissile != null)return onMissile.active;
 		if(limitedByTime)timeRemaining--;
 		if(limitedByTime && timeRemaining <= 0){
@@ -115,7 +114,7 @@ public abstract class Buff extends GameObject{
 	public void trigger(Alive  triggerTarget){
 		
 	}
-	public void drawMe(Camera camera){
+	public void drawMe(StandardCamera camera){
 		for(GameObject e: ownedObjects){
 			engine.util.drawActor(((VisibleObject)e), ((Effect)e).color, camera);
 		}
@@ -158,8 +157,8 @@ public abstract class Buff extends GameObject{
 		}
 		return true;
 	}
-	/**<ul>
-	 * <b>copy</b><p><code>&#8195;public abstract GameObject copy()</code>
+	/**
+	 * Should be defined to return a copy of this buff.
 	 */
 	public abstract GameObject copy();
 	protected void updateComponentLocation() {

@@ -3,18 +3,17 @@ package com.spartanlaboratories.engine.game;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.spartanlaboratories.engine.structure.Camera;
+import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
-import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.Util;
+import com.spartanlaboratories.engine.util.Location;
 
 /**
  * The Creep object is a special type of alive that is meant to behave like a mindless monster or "creep"
  * that simply follows a set of directions.
  * @author Spartak
  * @since Pre-A
- * @lastupdate A1
  */
 public class Creep extends Alive{
 	private boolean[] checkPoints = new boolean[engine.map.numberOfMovePoints];
@@ -54,8 +53,8 @@ public class Creep extends Alive{
 		/**Creep will store its current location as a location to return to. It might leave it if it aggros on something of if it has another movement
 		 * target but will always return to the sentry(guard) point. */SENTRY,
 		/**Creep will do its best to move randomly*/RANDOM, 
-		/**Creep will follow a set of constant move points. Its behaviour after completing the set is configured by {@link #CMPRule}.*/CMP, 
-		/**Makes the creep follow a CMP rule set and sets {@link #CMPRule} to CYCLE*/PATROL,;
+		/**Creep will follow a set of constant move points. Its behaviour after completing the set is configured by {@link Creep.CMPRule}.*/CMP, 
+		/**Makes the creep follow a CMP rule set and sets {@link Creep.CMPRule} to CYCLE*/PATROL,;
 		/**
 		 * Configures the passed in Creep to have this movement rule.
 		 * @param c The Creep that will have its movement rule changed to this one.
@@ -117,6 +116,12 @@ public class Creep extends Alive{
 		color = Util.Color.WHITE;
 		allCreeps.add(this);
 		initializeWithDefaultRules();
+		try {
+			setTexture();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	public boolean tick(){
 		switch(creepMovementRule){
@@ -208,7 +213,7 @@ public class Creep extends Alive{
 			return true;
 		return false;
 	}
-	public boolean drawMe(Camera camera) throws Util.NullColorException{
+	public boolean drawMe(StandardCamera camera) throws Util.NullColorException{
 		float[] rgb = getRGB();
 		rgb[0] *= getRatio("health");
 		rgb[1] *= getRatio("health");

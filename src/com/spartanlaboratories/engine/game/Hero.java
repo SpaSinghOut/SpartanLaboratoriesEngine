@@ -3,12 +3,12 @@ package com.spartanlaboratories.engine.game;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.spartanlaboratories.engine.structure.Camera;
+import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Controller;
 import com.spartanlaboratories.engine.structure.Engine;
-import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.Util;
+import com.spartanlaboratories.engine.util.Location;
 
 public class Hero<Element extends Ability> extends Alive{
 	private int inventorySize = 6;
@@ -44,6 +44,12 @@ public class Hero<Element extends Ability> extends Alive{
 		initStats();
 		inventory = new ItemList(inventorySize, ItemList.Type.INVENTORY, this);
 		initHeroType(HeroType.RAZOR);
+		try {
+			setTexture();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	public void initHeroType(HeroType setHeroType){
 		heroType = setHeroType;
@@ -76,7 +82,7 @@ public class Hero<Element extends Ability> extends Alive{
 		Alive.allAlives.remove(this);
 	}
 	@Override
-	public boolean drawMe(Camera fromCamera)throws Util.NullColorException{
+	public boolean drawMe(StandardCamera fromCamera)throws Util.NullColorException{
 		if(!super.drawMe(fromCamera, getRGB()))return false;
 		engine.util.drawActor(manaBar, manaBar.color, fromCamera);
 		return true;
@@ -110,7 +116,7 @@ public class Hero<Element extends Ability> extends Alive{
 		hero.abilities = new ArrayList<Element>();
 		for(Element e:abilities)hero.abilities.add(e);
 	}
-	public void leftClick(Location locationOnScreen, Camera camera){
+	public void leftClick(Location locationOnScreen, StandardCamera camera){
 		castSpell(equippedSpell);
 	}
 	private void initStats(){

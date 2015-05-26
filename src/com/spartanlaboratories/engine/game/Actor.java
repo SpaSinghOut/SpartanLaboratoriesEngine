@@ -1,10 +1,10 @@
 package com.spartanlaboratories.engine.game;
 
-import com.spartanlaboratories.engine.structure.Camera;
+import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Controller;
 import com.spartanlaboratories.engine.structure.Engine;
-import com.spartanlaboratories.engine.structure.Location;
+import com.spartanlaboratories.engine.util.Location;
 
 public class Actor extends VisibleObject implements AcceptsInput{
 	public static String className;
@@ -38,10 +38,9 @@ public class Actor extends VisibleObject implements AcceptsInput{
 	}
 	public boolean tick(){
 		if(target!=null){
-			if(!childSetsOwnMovement && !immobile){
+			if(!childSetsOwnMovement && !immobile)
 				setMovement(target);
-			}
-			if(reachedTarget()&&!keepTarget)
+			if(atTarget()&&!keepTarget)
 				setTarget(null);
 			if(needToMove && !immobile)
 				switch(movementType){
@@ -59,39 +58,6 @@ public class Actor extends VisibleObject implements AcceptsInput{
 			pushOrder = 0;
 		}
 		return super.tick();
-	}
-	protected void moveToALocation(){
-		/*
-		 * Store the current location of this object to be able to check if this actor moved
-		 * after the first attempt at movement
-		 */
-		Location old = new Location(getLocation());
-		int rotation = 0;
-		//if closer to target than own speed teleport there
-		if(engine.util.getRealCentralDistance(this, target) < getTrueSpeed()){
-			setLocation(target);
-			return;
-		}
-		//if farther:
-		else do{
-			//first attempt at movement
-			if(move())return;//if succeeded then return
-			//if failed then path
-			double angle;
-			angle = locChange.y > 0 || (locChange.y == 0 && locChange.x > 0) ?
-					Math.acos(locChange.x / getTrueSpeed()) : 2 * Math.PI - Math.acos(locChange.x / getTrueSpeed());
-					setMovement(new Location(getLocation().x + Math.cos(angle + Math.PI / maxRotation * rotation) * getTrueSpeed(),
-					getLocation().y + Math.sin(angle + Math.PI / maxRotation * rotation) * getTrueSpeed()));
-					move();
-		}while(old.x == getLocation().x && old.y == getLocation().y && ++rotation < maxRotation / 2);
-		
-	}
-	protected void moveInADirection(){
-		move();
-	}
-	private void home(){
-		setMovement(target);
-		moveToALocation();
 	}
 	Location locChange;
 	/**
@@ -127,27 +93,6 @@ public class Actor extends VisibleObject implements AcceptsInput{
 		whom.locChange.y = locChange.y;
 		whom.move();
 	}
-	private boolean anythingInTheWay() {
-		boolean selfCheck, collisionCheck;
-		for(VisibleObject a : engine.qt.retrieveBox(getLocation().x - getWidth() * 2,getLocation().y - getHeight() * 2,getLocation().x + getWidth() * 2,getLocation().y + getHeight() * 2)){
-			selfCheck = a != this;
-			collisionCheck = engine.util.checkForCollision(this, a);
-			if(a.active && a.solid && selfCheck && collisionCheck)
-				return true;
-		}
-		return false;
-	}
-	private boolean anythingInTheWay(double distanceCheck){
-		for(Actor a : engine.allActors){
-			if(a.active && a.solid && a!= this && a.getLocation() != target)
-				for(int i = 0; i < distanceCheck; i++)if(engine.util.checkForCollision(this, a) || 
-			(engine.util.checkPointCollision(a, new Location(getLocation().x + i * locChange.x, getLocation().y + i * locChange.y)) 
-			)){
-				return true;
-			}
-		}
-		return false;
-	}
 	/**
 	 * Changes the speed of the actor by a flat amount, best used for non-percentage based speed modifiers.
 	 * @param speedChange the amount by which the speed is to be modified
@@ -178,7 +123,7 @@ public class Actor extends VisibleObject implements AcceptsInput{
 		else if(speed < 10)speed = 10;
 		return speed;
 	}
-	/**<ul><b>getTrueSpeed</b><p><code>&#8195;protected double getTrueSpeed()</code><p>
+	/**
 	 * Returns the distance that is covered by this actor in one tick.
 	 * @return actor's speed in units/tick
 	 */
@@ -206,7 +151,7 @@ public class Actor extends VisibleObject implements AcceptsInput{
 	public void setHomingTarget(Location homingTarget){
 		target = homingTarget;
 	}
-	/**<ul><b>goTo<code><p>&#8195;</b>public void goTo(Location setTarget)<p></code>
+	/**
 	 * Changes the target location of the actor to a copy of the one passed in as well as modifies actor
 	 * properties to ready it up for movement
 	 * @param setTarget the new target location
@@ -221,12 +166,13 @@ public class Actor extends VisibleObject implements AcceptsInput{
 	 * @return a boolean value that shows whether or not this is true
 	 */
 	protected boolean reachedTarget(){
-		if(getLocation().x < target.x + getWidth() / 2
+		return getLocation().x < target.x + getWidth() / 2
 		&& getLocation().x > target.x - getWidth() / 2
 		&& getLocation().y < target.y + getHeight() / 2
-		&& getLocation().y > target.y - getHeight() / 2)
-			return true;
-		return false;
+		&& getLocation().y > target.y - getHeight() / 2;
+	}
+	private boolean atTarget(){
+		return getLocation().equals(target);
 	}
 	/**
 	 * <b>copy</b>
@@ -249,11 +195,11 @@ public class Actor extends VisibleObject implements AcceptsInput{
 		a.movementType = movementType;
 	}
 	@Override
-	public void rightClick(Location locationOnScreen, Camera camera) {
+	public void rightClick(Location locationOnScreen, StandardCamera camera) {
 		setTarget(Location.getLocationInWorld(locationOnScreen, camera));
 	}
 	@Override
-	public void leftClick(Location locationOnScreen, Camera camera) {
+	public void leftClick(Location locationOnScreen, StandardCamera camera) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -261,5 +207,60 @@ public class Actor extends VisibleObject implements AcceptsInput{
 	public void keyPress(String key) {
 		// TODO Auto-generated method stub
 		
+	}
+	private boolean anythingInTheWay() {
+		boolean selfCheck, collisionCheck;
+		for(VisibleObject a : engine.qt.retrieveBox(getLocation().x - getWidth() * 2,getLocation().y - getHeight() * 2,getLocation().x + getWidth() * 2,getLocation().y + getHeight() * 2)){
+			selfCheck = a != this;
+			collisionCheck = engine.util.checkForCollision(this, a);
+			if(a.active && a.solid && selfCheck && collisionCheck)
+				return true;
+		}
+		return false;
+	}
+	private boolean anythingInTheWay(double distanceCheck){
+		for(Actor a : engine.allActors){
+			if(a.active && a.solid && a!= this && a.getLocation() != target)
+				for(int i = 0; i < distanceCheck; i++)if(engine.util.checkForCollision(this, a) || 
+			(engine.util.checkPointCollision(a, new Location(getLocation().x + i * locChange.x, getLocation().y + i * locChange.y)) 
+			)){
+				return true;
+			}
+		}
+		return false;
+	}
+	private void moveToALocation(){
+		/*
+		 * Store the current location of this object to be able to check if this actor moved
+		 * after the first attempt at movement
+		 */
+		Location old = new Location(getLocation());
+		int rotation = 0;
+		//if closer to target than own speed teleport there
+		if(engine.util.getRealCentralDistance(this, target) < getTrueSpeed()){
+			System.out.println("test");
+			setLocation(target);
+			return;
+		}
+		//if farther:
+		else do{
+			//first attempt at movement
+			if(move())return;//if succeeded then return
+			//if failed then path
+			double angle;
+			angle = locChange.y > 0 || (locChange.y == 0 && locChange.x > 0) ?
+					Math.acos(locChange.x / getTrueSpeed()) : 2 * Math.PI - Math.acos(locChange.x / getTrueSpeed());
+					setMovement(new Location(getLocation().x + Math.cos(angle + Math.PI / maxRotation * rotation) * getTrueSpeed(),
+					getLocation().y + Math.sin(angle + Math.PI / maxRotation * rotation) * getTrueSpeed()));
+					move();
+		}while(old.x == getLocation().x && old.y == getLocation().y && ++rotation < maxRotation / 2);
+		
+	}
+	private void moveInADirection(){
+		move();
+	}
+	private void home(){
+		setMovement(target);
+		moveToALocation();
 	}
 }

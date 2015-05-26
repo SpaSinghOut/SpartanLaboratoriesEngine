@@ -10,8 +10,8 @@ import javax.xml.stream.XMLStreamReader;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.Human;
-import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.Util;
+import com.spartanlaboratories.engine.util.Location;
 
 /**
  * The Ability class is this engine's prototype and utility class for creating Hero abilities or spells. This class gets its basic information from 
@@ -25,10 +25,10 @@ public abstract class Ability implements Castable{
 	public class AbilityStats{
 		int CD;										//The cool down of this ability
 		int manaCost;								//The amount of mana required to use this ability
-		Util.Color color;					//The main color of this ability
+		public Util.Color color;					//The main color of this ability
 		int duration;								//How long this ability lasts
-		CastType castType;					//The way in which this ability is cast
-		int[] levelRequirements;				//A list of the hero levels at which this ability can have more points put towards it
+		public CastType castType;					//The way in which this ability is cast
+		public int[] levelRequirements;				//A list of the hero levels at which this ability can have more points put towards it
 		Ability owner;
 		public String name;
 		AbilityStats(String abilityName) throws XMLStreamException, FileNotFoundException{
@@ -161,7 +161,7 @@ public abstract class Ability implements Castable{
 	private Location targetLocation;			//and what is that Alive's location
 	public int level;									//The amount of skill points that were put into this ability
 	private int castControl;							//Is used to prevent toggle skills from activating multiple times per click/press
-	private AbilityStats abilityStats;
+	public AbilityStats abilityStats;
 	public Ability(String abilityName, Hero setOwner){
 		owner = setOwner;
 		try {

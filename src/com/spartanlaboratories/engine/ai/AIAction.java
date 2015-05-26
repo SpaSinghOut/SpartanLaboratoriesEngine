@@ -6,7 +6,7 @@ import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.Creep;
 import com.spartanlaboratories.engine.game.Hero;
 import com.spartanlaboratories.engine.structure.Constants;
-import com.spartanlaboratories.engine.structure.Location;
+import com.spartanlaboratories.engine.util.Location;
 
 public class AIAction {
 	AI owner;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.VisibleObject;
+import com.spartanlaboratories.engine.util.Location;
 
 /**<b> One of the most important classes in the entire engine: The Quadtree</b>
  * <p>

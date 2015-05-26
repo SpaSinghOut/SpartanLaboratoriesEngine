@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
-import com.spartanlaboratories.engine.structure.Location;
 import com.spartanlaboratories.engine.structure.Util;
+import com.spartanlaboratories.engine.util.Location;
 
 public class Tower extends Alive {
 	private static final int towerHP = 1600;
@@ -37,8 +37,13 @@ public class Tower extends Alive {
 		missile = true;
 		attackMissileType = new MissileStats("auto");
 		changePermissions(Constants.autoAttackAllowed, true);
-		//Don't remember if this actually does anything
 		noRetraction = true;
+		try {
+			setTexture();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	public boolean tick(){
 		if(!super.tick())return false;
