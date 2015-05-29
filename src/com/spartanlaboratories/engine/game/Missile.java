@@ -64,7 +64,7 @@ public class Missile extends Actor{
 		parent = setParent;
 		changeBaseSpeed(missileType.speed);
 		engine.missiles.add(this);
-		color = missileType.color;
+		setColor(missileType.color);
 		needToMove = true;
 		childSetsOwnMovement = true;
 		shape = Actor.Shape.QUAD;

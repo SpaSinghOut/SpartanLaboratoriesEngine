@@ -113,7 +113,7 @@ public class Creep extends Alive{
 			break;
 			default: defaultColor = Util.Color.ORANGE;
 		}
-		color = Util.Color.WHITE;
+		setColor(Util.Color.WHITE);
 		allCreeps.add(this);
 		initializeWithDefaultRules();
 		try {

@@ -17,13 +17,13 @@ public class Tower extends Alive {
 		changePermissions(Constants.movementAllowed, false);
 		if(setFaction == Alive.Faction.RADIANT){
 			setLocation(100,1000);
-			color = Util.Color.WHITE;
+			setColor(Util.Color.WHITE);
 			changeStat(Constants.maxHealth, towerHP);
 			changeStat(Constants.health, towerHP);
 		}
 		else if(setFaction == Alive.Faction.DIRE){
 			setLocation(new Location(engine.getWrap().x - 100, 1000));
-			color = Util.Color.WHITE;
+			setColor(Util.Color.WHITE);
 			changeStat(Constants.maxHealth, towerHP);
 			changeStat(Constants.health, towerHP);
 		}

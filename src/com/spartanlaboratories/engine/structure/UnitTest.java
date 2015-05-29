@@ -3,7 +3,6 @@ package com.spartanlaboratories.engine.structure;
 import com.spartanlaboratories.engine.game.Ability;
 import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.Hero;
-import com.spartanlaboratories.engine.structure.Util.NullColorException;
 
 class UnitTest extends Map{
 
@@ -20,15 +19,15 @@ class UnitTest extends Map{
 
 	@Override
 	public void init() {
-		engine.tracker.initialize(Tracker.TrackerPreset.PRESET_REND_MAP);
-		// TODO Auto-generated method stub
+		engine.tracker.initialize(Tracker.TrackerPreset.PRESET_RUN);
+		engine.tracker.setNotifyPeriod(5);
 		Human human = new Human(engine, Alive.Faction.RADIANT);
 		Alive unit = new Hero<Spell>(engine, Hero.HeroType.RAZOR, human);
 		unit.setWidth(60);
 		unit.setHeight(60);
 		unit.changeBaseSpeed(300);
-		unit.color = Util.Color.WHITE;
-		//unit.setTexture("test.png");
+		unit.setColor(Util.Color.WHITE);
+		unit.setTexture("test.png");
 		unit.setLocation(0,0);
 		human.addUnit(unit);
 		human.getPrimaryCamera().worldLocation.setCoords(0,0);

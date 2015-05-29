@@ -13,9 +13,9 @@ public class TerrainObject extends VisibleObject{
 		solid = true;
 		setWidth(defaultTerrainSize);
 		setHeight(defaultTerrainSize);
-		color = defaultColor;
+		setColor(defaultColor);
 	}
 	public boolean drawMe(StandardCamera camera){
-		return super.drawMe(camera,engine.util.getRGB(color));
+		return super.drawMe(camera,engine.util.getRGB(getColor()));
 	}
 }

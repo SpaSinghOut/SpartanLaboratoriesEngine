@@ -116,15 +116,10 @@ public abstract class Buff extends GameObject{
 	}
 	public void drawMe(StandardCamera camera){
 		for(GameObject e: ownedObjects){
-			engine.util.drawActor(((VisibleObject)e), ((Effect)e).color, camera);
+			engine.util.drawVO(((VisibleObject)e), ((Effect)e).getColor(), camera);
 		}
 	}
 	public void setIntensity(double d){
-		if(d == 1){
-			int g;
-			g= 5;
-			if(g == 5);
-		}
 	}
 	public Alive getTarget(){
 		return target;

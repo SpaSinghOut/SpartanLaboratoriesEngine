@@ -1,21 +1,18 @@
 package com.spartanlaboratories.engine.structure;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.lwjgl.input.*;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
 
 import com.spartanlaboratories.engine.game.Ability;
 import com.spartanlaboratories.engine.game.Actor;
 import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.Hero;
 import com.spartanlaboratories.engine.game.VisibleObject;
-import com.spartanlaboratories.engine.game.Alive.Faction;
 import com.spartanlaboratories.engine.structure.Util.Color;
 import com.spartanlaboratories.engine.ui.Gui;
 import com.spartanlaboratories.engine.util.Location;
+import com.spartanlaboratories.engine.util.Rectangle;
 /**
  * A human version of a unit controller
  * @author spart_000
@@ -88,7 +85,7 @@ final public class Human extends Controller{
 		mapBackground = new VisibleObject(engine);
 		mapBackground.setWidth(gui.screenX * 0.1);
 		mapBackground.setHeight(gui.screenX * 0.1);
-		mapBackground.color = Util.Color.YELLOW;
+		mapBackground.setColor(Util.Color.YELLOW);
 		mapBackground.setLocation(mapBackground.getWidth() / 2, gui.screenY - mapBackground.getHeight() / 2);
 		portrait = new VisibleObject(engine);
 		portrait.setWidth(gui.screenX * 0.1);
@@ -106,9 +103,21 @@ final public class Human extends Controller{
 	final public void tick(){
 		try {
 			listenForInput();
-		} catch (SLEImproperInputException e) {}
+		} catch (SLEImproperInputException e) {
+			e.printStackTrace();
+		}
 		super.tick();
 		gui.tick();
+		for(Camera c:cameras)
+			for(VisibleObject vo: c.getQualifiedObjects())
+				c.generateQuad(vo);
+	}
+	void drawQuads(){
+		for(Camera c:cameras){
+			for(Quad q: Camera.quads)
+				engine.util.drawQuad(q);
+			c.clearQuads();
+		}
 	}
 	private int preventInputOverflow;
 	public Actor selected(Location clicked){
@@ -133,15 +142,15 @@ final public class Human extends Controller{
 	public enum LeftClickState{
 		DEFAULT, ABILITYUSE, ABILITYTAKE,;
 	}
-	
 	public void drawMe(StandardCamera camera) {
 		engine.tracker.giveStartTime(Tracker.REND_HUMAN_GUI);
 		gui.render();
 		engine.tracker.giveEndTime(Tracker.REND_HUMAN_GUI);
+		drawQuads();
+		// **************************************** PLAYER ICONS ************************************************ //
+		/*
 		engine.tracker.giveStartTime(Tracker.REND_HUMAN_PORTRAITS);
 		int r = 0, d = 0;
-		// ****************************************   PLAYER ICONS ************************************************ //
-		/*
 		for(Controller ho: engine.controllers)
 			if(ho.selectedUnit.faction == Alive.Faction.RADIANT)
 				engine.util.drawOnScreen(ho.getHero(), Util.Color.WHITE, 
@@ -151,11 +160,12 @@ final public class Human extends Controller{
 		engine.tracker.giveEndTime(Tracker.REND_HUMAN_PORTRAITS);
 		*/
 		if(portrait.active)engine.util.drawOnScreen(portrait,Util.Color.WHITE,portrait.getLocation());
-		if(!showMap)return;
+		/*if(!showMap)return;
 		engine.tracker.giveStartTime(Tracker.REND_HUMAN_MAP);
 		engine.util.drawOnScreen(mapBackground, Color.YELLOW, mapBackground.getLocation());
 		for(Actor a: engine.allActors)if(Alive.class.isAssignableFrom(a.getClass()))engine.util.drawOnMap(this,a);
 		engine.tracker.giveEndTime(Tracker.REND_HUMAN_MAP);
+		*/
 	}
 	/**
 	 * Gets the current location of the mouse on the screen.

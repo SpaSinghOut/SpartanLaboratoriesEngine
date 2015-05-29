@@ -220,7 +220,9 @@ public class Gui extends JFrame implements KeyListener{
 	private int percentX(double d){return (Integer)((int)(d * screenX / 100));}
 	private int percentY(double d){return (Integer)((int)(d * screenY / 100));}
 	public void tick(){
-		if(!console.consoleInput.hasFocus())bcg.requestFocusInWindow();
+		if(!console.consoleInput.hasFocus())
+			//bcg.requestFocusInWindow()
+			;
 		
 		if(owner.selectedUnit==null||!Alive.class.isAssignableFrom(owner.selectedUnit.getClass()))return;
 		

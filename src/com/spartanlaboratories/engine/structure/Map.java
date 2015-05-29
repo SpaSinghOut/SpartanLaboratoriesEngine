@@ -85,7 +85,7 @@ public abstract class Map extends StructureObject{
 		engine.tracker.giveEndTime(Tracker.RENDMAP_DRAWACTORS);
 		engine.tracker.giveStartTime(Tracker.RENDMAP_OTHER);
 		drawBorder();
-		if(rune.active)engine.util.drawActor(rune, camera);
+		if(rune.active)engine.util.drawVO(rune, camera);
 		engine.tracker.giveEndTime(Tracker.RENDMAP_OTHER);
 	}
 	/**

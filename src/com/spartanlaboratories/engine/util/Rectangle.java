@@ -1,6 +1,5 @@
 package com.spartanlaboratories.engine.util;
 
-
 public class Rectangle extends Measurement<Rectangle>{
 	public Location northWest, northEast, southWest, southEast;
 	private Location size;
@@ -21,7 +20,7 @@ public class Rectangle extends Measurement<Rectangle>{
 		right = new Line(0,0);
 		bottom = new Line(0,0);
 		left = new Line(0,0);
-		setSize(size);
+		setSize(new Location(width,height));
 	}
 	public Rectangle(double xMin, double xMax, double yMin, double yMax){
 		this(new Location(xMin, xMax), new Location(Math.abs(xMax - xMin),Math.abs(yMax - yMin)));
@@ -101,5 +100,28 @@ public class Rectangle extends Measurement<Rectangle>{
 	@Override
 	public boolean equals(Rectangle element) {
 		return center.equals(element.getCenter())&&size.equals(element.getSize());
+	}
+	public static void main(String[] args){
+		System.out.println("Performing unit test for the class: Rectangle");
+		Location center = new Location();
+		Rectangle r = new Rectangle(center, 10, 10);
+		System.out.println("Created a rectangle using the center + size constructor.");
+		System.out.printf("Set the center to %s and the size to 10 by 10\n", center);
+		System.out.println("********** Testing Rectangle Values **********");
+		r.showValues();
+	}
+	public void showValues(){
+		System.out.printf("The rectangle center is: %s\n", getCenter());
+		System.out.printf("The rectangle size is: %s\n", getSize());
+		System.out.println("          Corner points");
+		System.out.println("NorthWest: " + northWest);
+		System.out.println("NorthEast: " + northEast);
+		System.out.println("SouthWest: " + southWest);
+		System.out.println("SouthEast: " + southEast);
+		System.out.println("          Edge values");
+		System.out.println("Minimum x: " + getXMin());
+		System.out.println("Maximum x: " + getXMax());
+		System.out.println("Minimum y: " + getYMin());
+		System.out.println("Maximum y: " + getYMax());
 	}
 }

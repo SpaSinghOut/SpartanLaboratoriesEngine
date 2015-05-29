@@ -121,7 +121,9 @@ public class Location extends Measurement<Location>{
 		changeY(changeInY);
 	}
 	/**
-	 * Returns at what point on the screen this location will be as seen by the given camera
+	 * Returns at what point on the screen this location will be at as seen by the given {@link StandardCamera}
+	 * 
+	 * @deprecated
 	 * @param camera the camera that will be viewing this location
 	 * @return this location's coordinates on a screen stored in a new location
 	 */
@@ -131,12 +133,15 @@ public class Location extends Measurement<Location>{
 	}
 	/** 
 	 * Returns a Location the coordinates of which are "real world" coordinates which correspond to the screen coordinates passed in.
+	 * 
+	 * @deprecated
 	 * @param locationOnScreen The location on screen whose coordinates are being converted to real world coordinates.
 	 * @param camera The camera that is viewing the location on screen.
 	 * @return a new Location with real world coordinates
 	 */
 	public static Location getLocationInWorld(Location locationOnScreen, StandardCamera camera){
-		return new Location(camera.worldLocation.x + locationOnScreen.x - camera.monitorLocation.x,
+		return new
+				Location(camera.worldLocation.x + locationOnScreen.x - camera.monitorLocation.x,
 				camera.worldLocation.y - locationOnScreen.y + camera.monitorLocation.y);
 	}
 	/**

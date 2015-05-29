@@ -31,11 +31,11 @@ public class Hero<Element extends Ability> extends Alive{
 	public Hero(Engine engine, HeroType setHeroType, Controller controller) {
 		super(engine, controller.faction);
 		manaBar = new VisibleObject(engine);
-		manaBar.color = Util.Color.BLUE;
+		manaBar.setColor(Util.Color.BLUE);
 		setWidth(35);
 		setHeight(35);
 		defaultColor = Util.Color.WHITE;
-		color = defaultColor;
+		setColor(defaultColor);
 		shape = Actor.Shape.QUAD;
 		setLocation(new Location(faction == Alive.Faction.RADIANT ? 500: 2500, 750));
 		childSetsOwnMovement = true;
@@ -84,7 +84,7 @@ public class Hero<Element extends Ability> extends Alive{
 	@Override
 	public boolean drawMe(StandardCamera fromCamera)throws Util.NullColorException{
 		if(!super.drawMe(fromCamera, getRGB()))return false;
-		engine.util.drawActor(manaBar, manaBar.color, fromCamera);
+		engine.util.drawVO(manaBar, manaBar.getColor(), fromCamera);
 		return true;
 	}
 	public void setWidth(double width){

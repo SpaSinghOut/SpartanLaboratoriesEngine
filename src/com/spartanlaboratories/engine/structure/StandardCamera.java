@@ -1,14 +1,20 @@
 package com.spartanlaboratories.engine.structure;
 
+import java.util.ArrayList;
+
+import org.newdawn.slick.opengl.Texture;
+
+import com.spartanlaboratories.engine.game.Actor;
+import com.spartanlaboratories.engine.game.Alive;
+import com.spartanlaboratories.engine.game.Hero;
 import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.util.Location;
 /**
  * <h1>The StandardCamera Object</h1>
- * Extends: <a href="StructureObject.html">Structure Object</a>
  * <p>Used by the <a href="Human.html">Human</a> object for viewing visible objects
  * @author Spartak
  */
-public class StandardCamera extends StructureObject{
+public class StandardCamera extends StructureObject implements Camera{
 	public EdgePanRules edgePanRules = new EdgePanRules();
 	class EdgePanRules{
 		boolean panOn;
@@ -146,5 +152,52 @@ public class StandardCamera extends StructureObject{
 	}
 	public boolean yMaxBound(double y){
 		return y < monitorLocation.y + dimensions.y / 2;
+	}
+	@Override
+	public void generateQuad(VisibleObject visibleObject){
+		Texture texture = visibleObject.getTextureNE();
+		boolean hasTexture = texture != null;
+		Location[] quadCorners = new Location[4], textureValues = new Location[4];
+		quadCorners[0] = getMonitorLocation(visibleObject.getAreaCovered().northWest);
+		quadCorners[1] = getMonitorLocation(visibleObject.getAreaCovered().northEast);
+		quadCorners[2] = getMonitorLocation(visibleObject.getAreaCovered().southEast);
+		quadCorners[3] = getMonitorLocation(visibleObject.getAreaCovered().southWest);
+		textureValues[0] = new Location();
+		textureValues[1] = hasTexture ? new Location(texture.getWidth(), 0) : new Location();
+		textureValues[2] = hasTexture ? new Location(texture.getWidth(), texture.getHeight()): new Location();
+		textureValues[3] = hasTexture ? new Location(0, texture.getHeight()) :new Location();
+		Quad quad = new Quad(quadCorners, textureValues);
+		quad.texture = texture;
+		quad.color = visibleObject.getColor();
+		quads.add(quad);
+	}
+	@Override
+	public Actor unitAt(Location monitorLocation) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void handleClick(int mouseButton) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseAt(Location monitorLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public Location getWorldLocation(Location locationOnScreen) {
+		return new Location(worldLocation.x + locationOnScreen.x - monitorLocation.x,
+							worldLocation.y + locationOnScreen.y - monitorLocation.y);
+	}
+	public Location getMonitorLocation(Location locationInWorld){
+		return new Location(monitorLocation.x - worldLocation.x + locationInWorld.x,
+				monitorLocation.y - worldLocation.y + locationInWorld.y);
+	}
+	@Override
+	public ArrayList<VisibleObject> getQualifiedObjects() {
+		return engine.qt.retrieveBox(worldLocation.x - dimensions.x, worldLocation.y - dimensions.y, 
+				worldLocation.x + dimensions.x, worldLocation.y + dimensions.y);
 	}
 }

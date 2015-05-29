@@ -15,7 +15,6 @@ public final class Tracker extends StructureObject {
 	Location[] recordedTimes = new Location[numberOfTrackedEntities];
 	Location[] entityStats = new Location[numberOfTrackedEntities];
 	String[] entityNames = new String[numberOfTrackedEntities];
-	//Location[] lifespanTimes = new Location[numberOfTrackedEntities];
 	Location[] lifespanStats = new Location[numberOfTrackedEntities];
 	File file = new File("log.txt");
 	BufferedWriter writer;
@@ -87,11 +86,6 @@ public final class Tracker extends StructureObject {
 	public void setNotifyPeriod(int seconds){
 		notifyPeriod = seconds;
 	}
-	private void initEntityNames(){
-		entityNames[0] = "Unit Selection"; entityNames[1] = "Tick"; entityNames[2] = "Render"; entityNames[3] = "Quadtree reset";
-		entityNames[4] = "Hero owner tick"; entityNames[5] = "Map Tick"; 
-		entityNames[9] = "Render Missile"; entityNames[10] = "Render Map"; entityNames[11] = "Render Heroes"; entityNames[12] = "Render Human"; 
-	}
 	public void tick(){
 		if(engine.util.everySecond(notifyPeriod)){
 			for(int i = 0; i < numberOfTrackedEntities; i++){
@@ -122,10 +116,6 @@ public final class Tracker extends StructureObject {
 		recordedTimes[entityIdentity].y = System.nanoTime();
 		calculateEntityStats(entityIdentity);
 	}
-	private void calculateEntityStats(int entityIdentity){
-		entityStats[entityIdentity].x += (recordedTimes[entityIdentity].y - recordedTimes[entityIdentity].x) / (1000 * 1000 * 1000);
-		entityStats[entityIdentity].y = entityStats[entityIdentity].x * tickRate * 100;
-	}
 	public void displayEntityStats(int entityIdentity){
 		System.out.print("Entity ");
 		System.out.print(entityNames[entityIdentity] != null ? entityNames[entityIdentity] : ("number: "+ entityIdentity)); 
@@ -137,14 +127,6 @@ public final class Tracker extends StructureObject {
 		System.out.print(entityNames[entityIdentity] != null ? entityNames[entityIdentity] : ("number: "+ entityIdentity)); 
 		System.out.println(" took " + String.format("%.9f", (lifespanStats[entityIdentity].x / ticksTracked)) + " seconds\n" + "which is "
 		+ String.format("%.2f", lifespanStats[entityIdentity].y) + "% of the time appropriated for a single tick");
-	}
-	private void log(){
-		if(engine.util.everySecond(1))try{
-			writer.write("At Second number " + ++secondTracked + ", " + lifespanStats[FUNC_TICK].x + " seconds were used for the tick function");
-			writer.newLine();
-		}catch(IOException e){
-			System.out.println("There is a problem with the tracker's log() function");
-		}
 	}
 	public void closeWriter(){
 		try {
@@ -166,6 +148,23 @@ public final class Tracker extends StructureObject {
 	public void printAndLog(String string){
 		System.out.println(string);
 		log(string);
+	}
+	private void initEntityNames(){
+		entityNames[0] = "Unit Selection"; entityNames[1] = "Tick"; entityNames[2] = "Render"; entityNames[3] = "Quadtree reset";
+		entityNames[4] = "Hero owner tick"; entityNames[5] = "Map Tick"; 
+		entityNames[9] = "Render Missile"; entityNames[10] = "Render Map"; entityNames[11] = "Render Heroes"; entityNames[12] = "Render Human"; 
+	}
+	private void calculateEntityStats(int entityIdentity){
+		entityStats[entityIdentity].x += (recordedTimes[entityIdentity].y - recordedTimes[entityIdentity].x) / (1000 * 1000 * 1000);
+		entityStats[entityIdentity].y = entityStats[entityIdentity].x * tickRate * 100;
+	}
+	private void log(){
+		if(engine.util.everySecond(1))try{
+			writer.write("At Second number " + ++secondTracked + ", " + lifespanStats[FUNC_TICK].x + " seconds were used for the tick function");
+			writer.newLine();
+		}catch(IOException e){
+			System.out.println("There is a problem with the tracker's log() function");
+		}
 	}
 	private void logLifespanStats(){
 		for(int i = 0; i < numberOfTrackedEntities; i++)if(this.trackedEntities[i]){

@@ -18,7 +18,7 @@ import com.spartanlaboratories.engine.util.Rectangle;
 
 public class VisibleObject extends GameObject{
 	public Shape shape;
-	public Util.Color color;
+	private Util.Color color;
 	public Util.Color defaultColor;
 	public boolean solid;
 	public boolean immobile;
@@ -28,6 +28,7 @@ public class VisibleObject extends GameObject{
 	private Texture texture;
 	private final Rectangle areaCovered = new Rectangle(new Location(), 0, 0);
 	ArrayList<Effect> effects = new ArrayList<Effect>(); // Maybe unused
+	private TextureInfo textureInfo = new TextureInfo();
 	public enum Shape{
 		QUAD, TRI,;
 	}
@@ -44,9 +45,9 @@ public class VisibleObject extends GameObject{
 	}
 	@Override
 	public boolean tick(){
+		if(textureInfo.updateNeeded || resetTexture)updateTexture();
 		return super.tick();
 	}
-	private TextureInfo textureInfo;
 	/**
 	 * Performs actions that should be taken every time the engine is updated. Does nothing at this
 	 * level in the game object tree and is meant to be overridden by subclasses that wish to perform 
@@ -79,6 +80,7 @@ public class VisibleObject extends GameObject{
 	 */
 	public void setWidth(double width) {
 		this.width = width;
+		areaCovered.setSize(new Location(width, height));
 	}
 	/**
 	 * Returns the height value of this {@link VisibleObject}
@@ -103,18 +105,7 @@ public class VisibleObject extends GameObject{
 	 */
 	public void setHeight(double height) {
 		this.height = height;
-	}
-	/**
-	 * Draws this object as viewed by the given camera. Will return true only if the object is both
-	 * active and can be seen by the camera (so if it is actually drawn.
-	 * 
-	 * @param camera - The camera that will be viewing this object.
-	 * @return - A boolean value that signifies the success of the drawing 
-	 * @throws Util.NullColorException - if the color of this object is null
-	 * 
-	 */
-	public boolean drawMe (StandardCamera camera) throws Util.NullColorException{
-		return !active?active:drawMe(camera, getRGB());
+		areaCovered.setSize(new Location(width, height));
 	}
 	/**
 	 * Returns a float array that is generated from this object's color value. If that color value
@@ -139,7 +130,6 @@ public class VisibleObject extends GameObject{
 	 * @return true
 	 */
 	public boolean setTexture(String format, String pathName){
-		textureInfo = new TextureInfo();
 		textureInfo.updateNeeded = true;
 		textureInfo.textureFormat = format;
 		textureInfo.namePath = pathName;
@@ -152,7 +142,7 @@ public class VisibleObject extends GameObject{
 	 * Example: if the full name of the file (including the extension) is "test.jpg" and it is inside a folder named "resources" then the string
 	 * that should be passed in as an argument when calling this function should be "resources/test.jpg".
 	 * @param pathName - A String objects that represents the location and name of the texture.
-	 * @return A boolean value that represents whether or not the function succeded at setting the 
+	 * @return A boolean value that represents whether or not the function succeeded at setting the 
 	 * texture.
 	 */
 	public boolean setTexture(String pathName){
@@ -193,16 +183,7 @@ public class VisibleObject extends GameObject{
 	public VisibleObject copy(){
 		VisibleObject vo = new VisibleObject(engine);
 		super.copyTo(vo);
-		vo.height = height;
-		vo.shape = shape;
-		vo.width = width;
-		vo.texture = texture;
-		vo.color = duplicateColor();
-		vo.defaultColor = defaultColor;
-		vo.solid = solid;
-		vo.immobile = immobile;
-		for(Effect e:effects)vo.effects.add(e);
-		vo.resetTexture = resetTexture;
+		copyTo(vo);
 		return vo;
 	}
 	/**
@@ -251,6 +232,25 @@ public class VisibleObject extends GameObject{
 	public void resetColor(){
 		color = defaultColor;
 	}
+	public Util.Color getColor(){
+		return color != null ? color : Util.Color.WHITE;
+	}
+	public void setColor(Util.Color color){
+		this.color = color;
+	}
+	/**
+	 * Draws this object as viewed by the given camera. Will return true only if the object is both
+	 * active and can be seen by the camera (so if it is actually drawn.
+	 * 
+	 * @deprecated
+	 * @param camera - The camera that will be viewing this object.
+	 * @return - A boolean value that signifies the success of the drawing 
+	 * @throws Util.NullColorException - if the color of this object is null
+	 * 
+	 */
+	public boolean drawMe (StandardCamera camera) throws Util.NullColorException{
+		return !active?active:drawMe(camera, getRGB());
+	}
 	/**
 	 * Draws this object at a slightly lower level access to other object drawing functions. (Meaning
 	 * it directly accesses the drawing functions in the Util class). This method generally should not be
@@ -258,7 +258,12 @@ public class VisibleObject extends GameObject{
 	 * {@link #drawMe(StandardCamera)}. This can be 
 	 * overwritten but would mean that the user has to deal with the Util class drawing function. It 
 	 * is suggested that overrides of this method call their super.
+	 * <p>
+	 * This method is deprecated! No longer does any visible object or any of its components have to be explicitly drawn.
+	 * The method will remain here for a few versions just in case the new system works imperfectly and
+	 * needs to be augmented by explicit draw function calls.
 	 * 
+	 * @deprecated
 	 * @param camera - The {@link StandardCamera} that is viewing this object.
 	 * @param RGB - The RBG values that designate the color of this object.
 	 * @return A boolean that designates if the drawing of this object was successful.
@@ -304,7 +309,6 @@ public class VisibleObject extends GameObject{
 	}
 	private void updateTexture(){
 		try {
-			if(texture != null)System.out.println(texture.toString());
 			texture = TextureLoader.getTexture(textureInfo.textureFormat, ResourceLoader.getResourceAsStream(textureInfo.namePath));
 		}catch (IOException e) {
 			System.out.println("A texture was set improperly");

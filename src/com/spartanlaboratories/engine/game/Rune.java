@@ -11,7 +11,7 @@ public class Rune extends VisibleObject{
 		solid = false;
 		powerType = setPowerType;
 		shape = Actor.Shape.TRI;
-		color = Util.Color.YELLOW;
+		setColor(Util.Color.YELLOW);
 	}
 	public enum PowerType{
 		NUKE, EXTRALIFE, DOUBLEDAMAGE, HASTE, FRIDGE;

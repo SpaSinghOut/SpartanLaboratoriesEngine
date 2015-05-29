@@ -1,7 +1,6 @@
 package com.spartanlaboratories.engine.structure;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 import org.newdawn.slick.opengl.Texture;
 
 import com.spartanlaboratories.engine.game.Actor;
@@ -17,7 +16,7 @@ import com.spartanlaboratories.engine.util.Location;
  * @author Spartak
  *
  */
-public class Util extends StructureObject{
+public final class Util extends StructureObject{
 	/**
 	 * Thrown if an object is being drawn that has not had its color value initialized. Sets this 
 	 * object's color to white.
@@ -30,7 +29,7 @@ public class Util extends StructureObject{
 			engine.tracker.printAndLog("A Null Color Exception has occured. A Visible Object of type: " + vo.getClass().getName()
 										+ " contains a null color value");
 			engine.tracker.printAndLog("Setting this object's color to white");
-			vo.color = Util.Color.WHITE;
+			vo.setColor(Util.Color.WHITE);
 		}
 	}
 	private Texture texture;
@@ -46,12 +45,15 @@ public class Util extends StructureObject{
 		}
 		return false;
 	}
-	public void drawActor(VisibleObject v, StandardCamera camera){
-		drawVO(v, getRGB(v.color), camera);
+	@Deprecated
+	public void drawVO(VisibleObject v, StandardCamera camera){
+		drawVO(v, getRGB(v.getColor()), camera);
 	}
-	public void drawActor(VisibleObject vo, Util.Color color, StandardCamera camera){
+	@Deprecated
+	public void drawVO(VisibleObject vo, Util.Color color, StandardCamera camera){
 		drawVO(vo, getRGB(color), camera);
 	}
+	@Deprecated
 	final public void drawVO(VisibleObject vo, float[] RGB, StandardCamera camera){
 		boolean hasTexture = setTexture(vo);
 		GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
@@ -149,30 +151,53 @@ public class Util extends StructureObject{
 		float[] RGB = getRGB(color);
 		setTexture(vo);
 		float textureWidth = texture != null ? (float) (texture.getWidth() ) : 1, 
-				  textureHeight = texture != null ? (float) (texture.getHeight() ) : 1;
-				  if(vo.shape == Actor.Shape.QUAD){
-					  setTexture(vo);
-					GL11.glBegin(GL11.GL_QUADS);
-					GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
-					GL11.glTexCoord2f(0,0);
-					GL11.glVertex2d(locationOnScreen.x - vo.getWidth() / 2,locationOnScreen.y - vo.getHeight() / 2);
-					GL11.glTexCoord2f(textureWidth,0);
-					GL11.glVertex2d(locationOnScreen.x + vo.getWidth() / 2, locationOnScreen.y - vo.getHeight() / 2);
-					GL11.glTexCoord2f(textureWidth,textureHeight);
-					GL11.glVertex2d(locationOnScreen.x + vo.getWidth() / 2, locationOnScreen.y + vo.getHeight() / 2);
-					GL11.glTexCoord2f(0,textureHeight);
-					GL11.glVertex2d(locationOnScreen.x - vo.getWidth() / 2, locationOnScreen.y + vo.getHeight() / 2);
-					GL11.glEnd();
-					GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-				}
-			else if(vo.shape == Actor.Shape.TRI){
-				GL11.glBegin(GL11.GL_TRIANGLES);
+			  textureHeight = texture != null ? (float) (texture.getHeight() ) : 1;
+		if(vo.shape == Actor.Shape.QUAD){
+			setTexture(vo);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
+				GL11.glTexCoord2f(0,0);
+				GL11.glVertex2d(locationOnScreen.x - vo.getWidth() / 2,locationOnScreen.y - vo.getHeight() / 2);
+				GL11.glTexCoord2f(textureWidth,0);
+				GL11.glVertex2d(locationOnScreen.x + vo.getWidth() / 2, locationOnScreen.y - vo.getHeight() / 2);
+				GL11.glTexCoord2f(textureWidth,textureHeight);
+				GL11.glVertex2d(locationOnScreen.x + vo.getWidth() / 2, locationOnScreen.y + vo.getHeight() / 2);
+				GL11.glTexCoord2f(0,textureHeight);
+				GL11.glVertex2d(locationOnScreen.x - vo.getWidth() / 2, locationOnScreen.y + vo.getHeight() / 2);
+			GL11.glEnd();
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		}
+		else if(vo.shape == Actor.Shape.TRI){
+			GL11.glBegin(GL11.GL_TRIANGLES);
 				GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
 				GL11.glVertex2d(locationOnScreen.x - vo.getWidth() / 2, locationOnScreen.y - vo.getHeight() / 2);
 				GL11.glVertex2d(locationOnScreen.x + vo.getWidth() / 2, locationOnScreen.y - vo.getHeight() / 2);
 				GL11.glVertex2d(locationOnScreen.x - vo.getWidth() / 2, locationOnScreen.y + vo.getHeight() / 2);
 			GL11.glEnd();
-			}
+		}
+	}
+	void drawQuad(Quad quad){
+		/*
+		System.out.println("Showing texture values:");
+		System.out.println(quad.textureValues[0]);
+		System.out.println(quad.textureValues[1]);
+		System.out.println(quad.textureValues[2]);
+		System.out.println(quad.textureValues[3]);
+		//*/
+		float[] rgb = getRGB(quad.color);
+		GL11.glColor3f(rgb[0],rgb[1],rgb[2]);
+		if(quad.texture!=null)quad.texture.bind();
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glTexCoord2f((float)quad.textureValues[0].x, (float)quad.textureValues[0].y);
+			GL11.glVertex2d((float)quad.quadValues[3].x, (float)quad.quadValues[3].y);
+			GL11.glTexCoord2f((float)quad.textureValues[1].x, (float)quad.textureValues[1].y);
+			GL11.glVertex2d((float)quad.quadValues[2].x, (float)quad.quadValues[2].y);
+			GL11.glTexCoord2f((float)quad.textureValues[2].x, (float)quad.textureValues[2].y);
+			GL11.glVertex2d((float)quad.quadValues[1].x, (float)quad.quadValues[1].y);
+			GL11.glTexCoord2f((float)quad.textureValues[3].x, (float)quad.textureValues[3].y);
+			GL11.glVertex2d((float)quad.quadValues[0].x, (float)quad.quadValues[0].y);
+		GL11.glEnd();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
 	public enum Color{
 		RED, GREEN, BLUE, YELLOW, PURPLE, PINK, BLACK,GRAY, WHITE, LIGHTBLUE, ORANGE,;

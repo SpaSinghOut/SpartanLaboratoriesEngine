@@ -213,12 +213,10 @@ public class Engine{
 		if(ambientUpdate)for(GameObject g: GameObject.gameObjects)if(!g.ticked)g.tick();
 	}	
 	private void render(){
-		//System.out.println("render test");
 		if(tracker.trackedEntities[Tracker.FUNC_RENDER])tracker.giveStartTime(Tracker.FUNC_RENDER);
 		for(Controller heroOwner:controllers)if(Human.class.isAssignableFrom(heroOwner.getClass()))render(((Human)heroOwner));
 		if(tracker.trackedEntities[Tracker.FUNC_RENDER])tracker.giveEndTime(Tracker.FUNC_RENDER);
 	}
-	
 	private void render(Human player){
 		try {
 			Display.setParent(player.gui.canvas);
@@ -227,12 +225,6 @@ public class Engine{
 		}
 		GL11.glClearColor(0.0f,0.0f,0.0f,0.0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		tracker.giveStartTime(Tracker.REND_MISSILE);
-		drawSpells(player.getPrimaryCamera());
-		tracker.giveEndTime(Tracker.REND_MISSILE);
-		tracker.giveStartTime(Tracker.REND_MAP);
-		map.drawMap(player.getPrimaryCamera());
-		tracker.giveEndTime(Tracker.REND_MAP);
 		tracker.giveStartTime(Tracker.REND_HUMAN);
 		player.drawMe(player.getPrimaryCamera());
 		tracker.giveEndTime(Tracker.REND_HUMAN);
@@ -248,7 +240,7 @@ public class Engine{
 	}
 	private void drawSpells(StandardCamera camera){
 		for(Missile missile : missiles){
-			util.drawActor(missile, missile.color, camera);	
+			util.drawVO(missile, missile.getColor(), camera);	
 		}
 	}
 	public Location getScreenDimensions(){

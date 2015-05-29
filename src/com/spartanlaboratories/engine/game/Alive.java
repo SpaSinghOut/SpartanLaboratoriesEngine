@@ -57,13 +57,13 @@ public class Alive extends Actor{
 		healthBar.solid = false;
 		switch(faction){
 		case RADIANT:
-			healthBar.color = Util.Color.GREEN;
+			healthBar.setColor(Util.Color.GREEN);
 			break;
 		case DIRE:
-			healthBar.color = Util.Color.RED;
+			healthBar.setColor(Util.Color.RED);
 			break;
 		case NEUTRAL:
-			healthBar.color = Util.Color.YELLOW;
+			healthBar.setColor(Util.Color.YELLOW);
 			break;
 		}
 	}

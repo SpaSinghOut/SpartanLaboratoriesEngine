@@ -1,11 +1,16 @@
 package com.spartanlaboratories.engine.structure;
 
+import java.util.ArrayList;
+
+import org.newdawn.slick.opengl.Texture;
+
+import com.spartanlaboratories.engine.game.Actor;
 import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.ui.Gui;
 import com.spartanlaboratories.engine.util.Location;
 import com.spartanlaboratories.engine.util.Rectangle;
 
-public class DynamicCamera{
+public class DynamicCamera implements Camera{
 	// FIELD DECLARATIONS
 	
 	private Rectangle world;
@@ -175,5 +180,55 @@ public class DynamicCamera{
 	}
 	public boolean equals(DynamicCamera camera){
 		return world.equals(camera.getWorldArea()) && monitor.equals(camera.getMonitorArea());
+	}
+	
+	// Camera interface implementation
+	
+	@Override
+	public void generateQuad(VisibleObject visibleObject){
+		Texture texture = visibleObject.getTextureNE();
+		boolean hasTexture = texture != null;
+		Location[] quadCorners = new Location[4], textureValues = new Location[4];
+		quadCorners[0] = visibleObject.getAreaCovered().northWest;
+		quadCorners[1] = visibleObject.getAreaCovered().northEast;
+		quadCorners[2] = visibleObject.getAreaCovered().southEast;
+		quadCorners[3] = visibleObject.getAreaCovered().southWest;
+		textureValues[0] = new Location();
+		textureValues[1] = hasTexture ? new Location(texture.getWidth(), 0) : new Location();
+		textureValues[2] = hasTexture ? new Location(texture.getWidth(), texture.getHeight()): new Location();
+		textureValues[3] = hasTexture ? new Location(0, texture.getHeight()) :new Location();
+		Quad quad = new Quad(quadCorners, textureValues);
+		quad.texture = texture;
+		quad.color = visibleObject.getColor();
+	}
+	
+	@Override
+	public Actor unitAt(Location monitorLocation) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void handleClick(int mouseButton) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseAt(Location monitorLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Location getWorldLocation(Location locationOnScreen) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ArrayList<VisibleObject> getQualifiedObjects() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
