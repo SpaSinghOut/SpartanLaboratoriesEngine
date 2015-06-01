@@ -1,6 +1,5 @@
 package com.spartanlaboratories.engine.structure;
-/**<ul>
- * <b>OldCommand</b><p><code>&#8195;final class OldCommand</code><p>
+/**
  * The old school way for the console to process commands, the new way is much more advanced that this one,
  * therefore this is deprecated.
  * However it does not contain all of the commands that exist in this version, they are being created but

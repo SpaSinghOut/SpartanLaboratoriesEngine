@@ -118,7 +118,7 @@ public class AIAction {
 			 */
 			Alive attackTarget = owner.getHero().attackTarget;
 			if(attackTarget == null || !attackTarget.alive || 
-			owner.engine.util.getRealCentralDistance(owner.getHero(), owner.getHero().attackTarget) > owner.getHero().getStat(Constants.visibilityRange)){
+			owner.engine.util.getDistanceFromCenter(owner.getHero(), owner.getHero().attackTarget) > owner.getHero().getStat(Constants.visibilityRange)){
 				owner.getHero().aggroOn(null);
 				completion = true;
 			}

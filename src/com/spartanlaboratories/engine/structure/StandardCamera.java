@@ -1,7 +1,9 @@
 package com.spartanlaboratories.engine.structure;
 
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+import org.lwjgl.input.Mouse;
 import org.newdawn.slick.opengl.Texture;
 
 import com.spartanlaboratories.engine.game.Actor;
@@ -16,7 +18,7 @@ import com.spartanlaboratories.engine.util.Location;
  */
 public class StandardCamera extends StructureObject implements Camera{
 	public EdgePanRules edgePanRules = new EdgePanRules();
-	class EdgePanRules{
+	public class EdgePanRules{
 		boolean panOn;
 		boolean panAll;
 		boolean panScreen;
@@ -26,7 +28,7 @@ public class StandardCamera extends StructureObject implements Camera{
 			panningSpeed = 20;
 			panningRange = 60;
 		}
-		void setPan(boolean pan){
+		public void setPan(boolean pan){
 			panOn = pan;
 		}
 	}
@@ -117,14 +119,14 @@ public class StandardCamera extends StructureObject implements Camera{
 	/**
 	 * Checks if any part of the passed in object is within the bounds of this camera. Should be identical 
 	 * in functionality to {@link #canSeeObject(VisibleObject)}. The difference is this method uses the parameter's location on screen rather than the 
-	 * real world location. This method provides an alternate way of checking the visibility of an object and should be used in case the algorith in 
+	 * real world location. This method provides an alternate way of checking the visibility of an object and should be used in case the algorithm in 
 	 * {@link #canSeeObject(VisibleObject)} is broken.
 	 * 
 	 * @param vo - The {@link VisibleObject} whose presence within the borders of this camera is being tested.
 	 * @return - A boolean value that represents whether or not this the passed in object is within borders.
 	 */
 	public boolean withinBounds(VisibleObject vo){
-		Location loc = vo.getLocation().getScreenCoords(this);
+		Location loc = getMonitorLocation(vo.getLocation());
 		double x = loc.x, y = loc.y;
 		return xMinBound(x + vo.getWidth() / 2)
 				|| xMaxBound(x - vo.getWidth() / 2)
@@ -142,16 +144,16 @@ public class StandardCamera extends StructureObject implements Camera{
 		return yMinBound(y)&&yMaxBound(y);
 	}
 	public boolean xMinBound(double x){
-		return x > monitorLocation.x - dimensions.x / 2;
+		return x >= monitorLocation.x - dimensions.x / 2;
 	}
 	public boolean xMaxBound(double x){
-		return x < monitorLocation.x + dimensions.x / 2;
+		return x <= monitorLocation.x + dimensions.x / 2;
 	}
 	public boolean yMinBound(double y){
-		return y > monitorLocation.y - dimensions.y / 2;
+		return y >= monitorLocation.y - dimensions.y / 2;
 	}
 	public boolean yMaxBound(double y){
-		return y < monitorLocation.y + dimensions.y / 2;
+		return y <= monitorLocation.y + dimensions.y / 2;
 	}
 	@Override
 	public void generateQuad(VisibleObject visibleObject){
@@ -172,8 +174,13 @@ public class StandardCamera extends StructureObject implements Camera{
 		quads.add(quad);
 	}
 	@Override
-	public Actor unitAt(Location monitorLocation) {
-		// TODO Auto-generated method stub
+	public Actor unitAt(Location monitorLocation){
+		Location location = getWorldLocation(monitorLocation);
+		final int searchRange = 200;
+		ArrayList<Actor> actors = engine.qt.retriveActors(location.x - searchRange, location.y - searchRange, location.x + searchRange, location.y + searchRange);
+		for(Actor a: actors)
+			if(engine.util.checkPointCollision(a, location))
+				return a;
 		return null;
 	}
 	@Override
@@ -182,9 +189,18 @@ public class StandardCamera extends StructureObject implements Camera{
 		
 	}
 	@Override
-	public void mouseAt(Location monitorLocation) {
-		// TODO Auto-generated method stub
-		
+	public void handleMouseLocation(Location locationOnScreen) {
+		if(!edgePanRules.panOn)return;
+		int range = edgePanRules.panningRange;
+		int speed = getCameraSpeed();
+		if(locationOnScreen.x < range)worldLocation.changeX(-speed);
+		else if(locationOnScreen.x > engine.getScreenDimensions().x - range)
+			worldLocation.changeX(speed);
+		if(locationOnScreen.y < range)worldLocation.changeY(speed);
+		else if(locationOnScreen.y > engine.getScreenDimensions().y - range)worldLocation.changeY(-speed);
+		if(locationOnScreen.x > range && locationOnScreen.x < engine.getScreenDimensions().x - range &&
+				locationOnScreen.y > range && locationOnScreen.y < engine.getScreenDimensions().y - range)
+			resetCameraSpeed();
 	}
 	@Override
 	public Location getWorldLocation(Location locationOnScreen) {
@@ -197,7 +213,21 @@ public class StandardCamera extends StructureObject implements Camera{
 	}
 	@Override
 	public ArrayList<VisibleObject> getQualifiedObjects() {
-		return engine.qt.retrieveBox(worldLocation.x - dimensions.x, worldLocation.y - dimensions.y, 
-				worldLocation.x + dimensions.x, worldLocation.y + dimensions.y);
+		return engine.qt.retrieveBox(worldLocation.x - dimensions.x / 2, worldLocation.y - dimensions.y / 2, 
+				worldLocation.x + dimensions.x / 2, worldLocation.y + dimensions.y / 2);
+	}
+	@Override
+	public boolean coversMonitorLocation(Location locationOnScreen) {
+		return withinBounds(locationOnScreen);
+	}
+	@Override
+	public void handleKeyPress(KeyEvent keyEvent) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void handleMouseWheel(int change, Location locationOnScreen) {
+		// TODO Auto-generated method stub
+		
 	}
 }

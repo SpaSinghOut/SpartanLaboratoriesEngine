@@ -46,7 +46,7 @@ public class AI extends Controller{
 					if(!getHero().hasAttackTarget())
 						getHero().aggroOn(a);
 					else{
-						if(engine.util.getRealCentralDistance(getHero(), a) < engine.util.getRealCentralDistance(getHero(), getHero().attackTarget))
+						if(engine.util.getDistanceFromCenter(getHero(), a) < engine.util.getDistanceFromCenter(getHero(), getHero().attackTarget))
 						getHero().aggroOn(a);
 						else if(!getHero().attackTarget.alive)getHero().aggroOn(a);
 					}

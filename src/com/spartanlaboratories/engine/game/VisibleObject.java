@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
+import org.newdawn.slick.opengl.*;
 import org.newdawn.slick.util.ResourceLoader;
 
 import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.Util;
-import com.spartanlaboratories.engine.structure.Util.NullColorException;
 import com.spartanlaboratories.engine.util.Location;
 import com.spartanlaboratories.engine.util.Rectangle;
 
@@ -148,7 +147,7 @@ public class VisibleObject extends GameObject{
 	public boolean setTexture(String pathName){
 		if(!pathName.contains("."))return false;
 		String txt = "";
-		for(int i = pathName.indexOf(".");i < pathName.length();)
+		for(int i = pathName.indexOf(".") + 1;i < pathName.length();)
 			txt += pathName.toCharArray()[i++];
 		return setTexture(txt, pathName);
 	}
@@ -309,7 +308,7 @@ public class VisibleObject extends GameObject{
 	}
 	private void updateTexture(){
 		try {
-			texture = TextureLoader.getTexture(textureInfo.textureFormat, ResourceLoader.getResourceAsStream(textureInfo.namePath));
+			texture = TextureLoader.getTexture(textureInfo.textureFormat.toUpperCase(), ResourceLoader.getResourceAsStream(textureInfo.namePath));
 		}catch (IOException e) {
 			System.out.println("A texture was set improperly");
 			e.printStackTrace();
@@ -317,5 +316,21 @@ public class VisibleObject extends GameObject{
 			resetTexture = false;
 			textureInfo.updateNeeded = false;
 		}
+	}
+	public void trashComponents(){}
+	public void setSize(double width, double height){
+		setHeight(height);
+		setWidth(width);
+	}
+	public void setSize(Location size){
+		setWidth(size.x);
+		setHeight(size.y);
+	}
+	public void setSize(double size){
+		setHeight(size);
+		setWidth(size);
+	}
+	public Location getSize(){
+		return new Location(getHeight(), getWidth());
 	}
 }

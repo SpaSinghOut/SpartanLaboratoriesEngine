@@ -3,6 +3,7 @@ package com.spartanlaboratories.engine.game;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.spartanlaboratories.engine.structure.SLEImproperInputException;
 import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Controller;
@@ -60,9 +61,12 @@ public class Hero<Element extends Ability> extends Alive{
 	}
 	public boolean tick(){
 		for(Ability a: abilities)a.tick();
+		updateManaBar();
 		return super.tick();
 	}
-	
+	private void updateManaBar(){
+		manaBar.setWidth(getWidth() * getRatio("mana"));
+	}
 	public void castSpell(Ability ability){
 		if(ability.state != Ability.State.READY && ability.abilityStats.castType != Castable.CastType.TOGGLE)
 			return;
@@ -70,7 +74,12 @@ public class Hero<Element extends Ability> extends Alive{
 			if(owner.selectedUnit == null || !Alive.class.isAssignableFrom(owner.selectedUnit.getClass()))return;
 			ability.setTarget((Alive)owner.selectedUnit);
 		}
-		ability.activate();
+		try {
+			ability.activate();
+		} catch (SLEImproperInputException e) {
+			System.out.println("The hero was unable to cast the spell due to improper input");
+			e.printStackTrace();
+		}
 		for(Buff b: getBuffs())
 			if(b.activationTrigger == Buff.TriggerType.ONSPELLCAST)
 				b.trigger(this);
@@ -118,6 +127,12 @@ public class Hero<Element extends Ability> extends Alive{
 	}
 	public void leftClick(Location locationOnScreen, StandardCamera camera){
 		castSpell(equippedSpell);
+	}
+	@Override
+	public void trashComponents(){
+		super.trashComponents();
+		manaBar.active = false;
+		engine.visibleObjects.remove(manaBar);
 	}
 	private void initStats(){
 		changeBaseSpeed(300);

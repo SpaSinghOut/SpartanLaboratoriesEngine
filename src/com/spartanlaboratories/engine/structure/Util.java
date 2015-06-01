@@ -1,6 +1,7 @@
 package com.spartanlaboratories.engine.structure;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.newdawn.slick.opengl.Texture;
 
 import com.spartanlaboratories.engine.game.Actor;
@@ -21,6 +22,7 @@ public final class Util extends StructureObject{
 	 * Thrown if an object is being drawn that has not had its color value initialized. Sets this 
 	 * object's color to white.
 	 * 
+	 * @deprecated
 	 * @author Spartak
 	 *
 	 */
@@ -59,6 +61,7 @@ public final class Util extends StructureObject{
 		GL11.glColor3f(RGB[0], RGB[1], RGB[2]);
 		GL11.glBegin(GL11.GL_QUADS);
 		if(!camera.fullyWithinBounds(vo)){
+			GL13.glActiveTexture(0);
 			drawVOEdge(vo, camera);
 			return;
 		}
@@ -72,6 +75,7 @@ public final class Util extends StructureObject{
 			if(hasTexture)GL11.glTexCoord2f(0,(float)(texture.getHeight()));
 			GL11.glVertex2d(x - vo.getWidth() / 2, y + vo.getHeight() / 2);
 			GL11.glEnd();
+		GL13.glActiveTexture(1);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
 	final private void drawVOEdge(VisibleObject actor, StandardCamera camera){
@@ -177,17 +181,17 @@ public final class Util extends StructureObject{
 		}
 	}
 	void drawQuad(Quad quad){
-		/*
-		System.out.println("Showing texture values:");
-		System.out.println(quad.textureValues[0]);
-		System.out.println(quad.textureValues[1]);
-		System.out.println(quad.textureValues[2]);
-		System.out.println(quad.textureValues[3]);
-		//*/
+		GL11.glPushMatrix();
+		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 		float[] rgb = getRGB(quad.color);
-		GL11.glColor3f(rgb[0],rgb[1],rgb[2]);
-		if(quad.texture!=null)quad.texture.bind();
+		GL11.glColor4f(rgb[0],rgb[1],rgb[2],1);
+		Texture newTexture = quad.texture;
+		if(newTexture != null && newTexture != texture){
+			texture = newTexture;
+			texture.bind();
+		}
 		GL11.glBegin(GL11.GL_QUADS);
+		{
 			GL11.glTexCoord2f((float)quad.textureValues[0].x, (float)quad.textureValues[0].y);
 			GL11.glVertex2d((float)quad.quadValues[3].x, (float)quad.quadValues[3].y);
 			GL11.glTexCoord2f((float)quad.textureValues[1].x, (float)quad.textureValues[1].y);
@@ -196,8 +200,11 @@ public final class Util extends StructureObject{
 			GL11.glVertex2d((float)quad.quadValues[1].x, (float)quad.quadValues[1].y);
 			GL11.glTexCoord2f((float)quad.textureValues[3].x, (float)quad.textureValues[3].y);
 			GL11.glVertex2d((float)quad.quadValues[0].x, (float)quad.quadValues[0].y);
+		}
 		GL11.glEnd();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		//GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glPopMatrix();
 	}
 	public enum Color{
 		RED, GREEN, BLUE, YELLOW, PURPLE, PINK, BLACK,GRAY, WHITE, LIGHTBLUE, ORANGE,;
@@ -255,16 +262,12 @@ public final class Util extends StructureObject{
 	public double getRealCentralDistance(Actor a, Actor b){
 		double xDist = getXDistance(a,b);
 		double yDist = getYDistance(a,b);
-		double distance = 0;
-		distance = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
-		return distance;
+		return Math.hypot(xDist, yDist);
 	}
-	public double getRealCentralDistance(Actor a, Location l){
+	public double getDistanceFromCenter(Actor a, Location l){
 		double xDist = getXDistance(a,l);
 		double yDist = getYDistance(a,l);
-		double distance = 0;
-		distance = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
-		return distance;
+		return Math.hypot(xDist, yDist);
 	}
 	public double getDistanceTangent(Actor a, Actor b){
 		return getYDistance(a,b) / getXDistance(a,b);
@@ -294,6 +297,14 @@ public final class Util extends StructureObject{
 			return java.awt.Color.PINK;
 		case ORANGE:
 			return java.awt.Color.ORANGE;
+		case BLACK:
+			return java.awt.Color.BLACK;
+		case GRAY:
+			return java.awt.Color.GRAY;
+		case LIGHTBLUE:
+			return java.awt.Color.CYAN;
+		default:
+			break;
 		}
 		return java.awt.Color.BLACK;
 	}
@@ -379,15 +390,5 @@ public final class Util extends StructureObject{
 			texture.bind();
 		}
 		return true;
-	}
-	public void drawOnMap(Human player, Actor actor){
-		Location savedLocation = new Location(actor.getLocation().x, actor.getLocation().y);							//save actor location
-		actor.setWidth(actor.getWidth() / Constants.mapMultiplicationFactor); actor.setHeight(actor.getHeight() / Constants.mapMultiplicationFactor);//actor size decrease
-		double xRatio = actor.getLocation().x / engine.getWrap().x, yRatio = actor.getLocation().y / engine.getWrap().y;
-		actor.setLocation(player.mapBackground.getLocation().x + ( -0.5 + xRatio) * player.mapBackground.getWidth()
-		, player.mapBackground.getLocation().y + ( -0.5 + yRatio) * player.mapBackground.getHeight());
-		drawOnScreen(actor, Color.WHITE, actor.getLocation());
-		actor.setWidth(actor.getWidth() * Constants.mapMultiplicationFactor);actor.setHeight(actor.getHeight() * Constants.mapMultiplicationFactor);//reverse actor size decrease
-		actor.setLocation(savedLocation.x, savedLocation.y);												//revert actor location
 	}
 }

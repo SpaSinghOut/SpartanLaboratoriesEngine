@@ -135,10 +135,12 @@ public class Engine{
 			GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 			GL11.glEnable(GL11.GL_BLEND);
 	        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+	        
 			GL11.glMatrixMode(GL11.GL_MODELVIEW);
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
 			GL11.glLoadIdentity();
 			GL11.glOrtho(0, (int)xDisplay, (int)yDisplay, 0, 1, -1);
+	        GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		} catch (LWJGLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -177,7 +179,6 @@ public class Engine{
 			logic.start();
 		}
 		//new Thread(new RunThread(2)).start();
-		
 		while(running)
 		if(System.nanoTime() > time + 1000000000 / Engine.tickRate){
 			time += 1000000000 / Engine.tickRate;
@@ -188,34 +189,36 @@ public class Engine{
 		
 	}
 	private void tick(){
+		tracker.giveStartTime(Tracker.FUNC_TICK);
 		for(GameObject g: GameObject.gameObjects)g.ticked = false;
-		if(tracker.trackedEntities[Tracker.FUNC_TICK])tracker.giveStartTime(Tracker.FUNC_TICK);
-		if(tracker.trackedEntities[Tracker.FUNC_QUADTREE_RESET])tracker.giveStartTime(Tracker.FUNC_QUADTREE_RESET);
+		tracker.giveStartTime(Tracker.FUNC_QUADTREE_RESET);
 		qt.clear();
-		if(tracker.trackedEntities[Tracker.FUNC_QUADTREE_RESET])tracker.giveEndTime(Tracker.FUNC_QUADTREE_RESET);
-		if(tracker.trackedEntities[Tracker.FUNC_HERO_OWNER_TICK])tracker.giveStartTime(Tracker.FUNC_HERO_OWNER_TICK);
+		tracker.giveEndTime(Tracker.FUNC_QUADTREE_RESET);
+		tracker.giveStartTime(Tracker.FUNC_HERO_OWNER_TICK);
 		for(Controller heroOwner: controllers)heroOwner.tick();
-		if(tracker.trackedEntities[Tracker.FUNC_HERO_OWNER_TICK])tracker.giveEndTime(Tracker.FUNC_HERO_OWNER_TICK);
-		if(tracker.trackedEntities[Tracker.FUNC_MAP_TICK])tracker.giveStartTime(Tracker.FUNC_MAP_TICK);
+		tracker.giveEndTime(Tracker.FUNC_HERO_OWNER_TICK);
+		tracker.giveStartTime(Tracker.FUNC_MAP_TICK);
 		map.tick();
-		if(tracker.trackedEntities[Tracker.FUNC_MAP_TICK])tracker.giveEndTime(Tracker.FUNC_MAP_TICK);
-		if(tracker.trackedEntities[Tracker.FUNC_MISSILE_TICK])tracker.giveStartTime(Tracker.FUNC_MISSILE_TICK);
+		tracker.giveEndTime(Tracker.FUNC_MAP_TICK);
+		tracker.giveStartTime(Tracker.FUNC_MISSILE_TICK);
 		tickMissiles();
-		if(tracker.trackedEntities[Tracker.FUNC_MISSILE_TICK])tracker.giveEndTime(Tracker.FUNC_MISSILE_TICK);
-		if(tracker.trackedEntities[Tracker.FUNC_AURA_TICK])tracker.giveStartTime(Tracker.FUNC_AURA_TICK);
+		tracker.giveEndTime(Tracker.FUNC_MISSILE_TICK);
+		tracker.giveStartTime(Tracker.FUNC_AURA_TICK);
 		tickAuras();
-		if(tracker.trackedEntities[Tracker.FUNC_AURA_TICK])tracker.giveEndTime(Tracker.FUNC_AURA_TICK);
-		if(tracker.trackedEntities[Tracker.FUNC_ACTOR_DELETION])tracker.giveStartTime(Tracker.FUNC_ACTOR_DELETION);
+		tracker.giveEndTime(Tracker.FUNC_AURA_TICK);
+		tracker.giveStartTime(Tracker.FUNC_ACTOR_DELETION);
 		deleteStuff();
-		if(tracker.trackedEntities[Tracker.FUNC_ACTOR_DELETION])tracker.giveEndTime(Tracker.FUNC_ACTOR_DELETION);
-		tracker.tick();
-		if(tracker.trackedEntities[Tracker.FUNC_TICK])tracker.giveEndTime(Tracker.FUNC_TICK);
+		tracker.giveEndTime(Tracker.FUNC_ACTOR_DELETION);
+		tracker.giveStartTime(Tracker.TICK_AMBIENT);
 		if(ambientUpdate)for(GameObject g: GameObject.gameObjects)if(!g.ticked)g.tick();
+		tracker.giveEndTime(Tracker.TICK_AMBIENT);
+		tracker.tick();
+		tracker.giveEndTime(Tracker.FUNC_TICK);
 	}	
 	private void render(){
-		if(tracker.trackedEntities[Tracker.FUNC_RENDER])tracker.giveStartTime(Tracker.FUNC_RENDER);
+		tracker.giveStartTime(Tracker.FUNC_RENDER);
 		for(Controller heroOwner:controllers)if(Human.class.isAssignableFrom(heroOwner.getClass()))render(((Human)heroOwner));
-		if(tracker.trackedEntities[Tracker.FUNC_RENDER])tracker.giveEndTime(Tracker.FUNC_RENDER);
+		tracker.giveEndTime(Tracker.FUNC_RENDER);
 	}
 	private void render(Human player){
 		try {
@@ -225,9 +228,9 @@ public class Engine{
 		}
 		GL11.glClearColor(0.0f,0.0f,0.0f,0.0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		tracker.giveStartTime(Tracker.REND_HUMAN);
-		player.drawMe(player.getPrimaryCamera());
-		tracker.giveEndTime(Tracker.REND_HUMAN);
+		tracker.giveStartTime(Tracker.REND_PLAYER);
+		player.drawMe();
+		tracker.giveEndTime(Tracker.REND_PLAYER);
 		Display.update();
 	}
 	private void tickMissiles(){
@@ -265,7 +268,10 @@ public class Engine{
 			else if(a.getClass() == Tower.class);
 			if(Alive.class.isAssignableFrom(a.getClass()))Alive.allAlives.remove(a);
 			if(Actor.class.isAssignableFrom(a.getClass()))allActors.remove(a);
-			if(VisibleObject.class.isAssignableFrom(a.getClass()))visibleObjects.remove(a);
+			if(VisibleObject.class.isAssignableFrom(a.getClass())){
+				visibleObjects.remove(a);
+				((VisibleObject)a).trashComponents();
+			}
 		}
 		deleteThis.clear();
 	}

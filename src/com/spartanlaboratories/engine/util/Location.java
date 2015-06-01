@@ -82,7 +82,8 @@ public class Location extends Measurement<Location>{
 		y += yChange;
 	}
 	/**
-	 * Sets the coordinates of the location to match those of the given location
+	 * Sets the coordinates of the location to match those of the given location. This method is the preferred alternative to creating a new location when
+	 * the location the coordinates of which need to be changed is declared as final and therefore its reference value cannot be updated.
 	 * 
 	 * @param location the location whose coordinates will be copied
 	 * @see #setCoords(double, double)
@@ -90,6 +91,20 @@ public class Location extends Measurement<Location>{
 	public void duplicate(Location location){
 		x = location.x;
 		y = location.y;
+	}
+	/**
+	 * Sets the x coordinate of this location to the specified value
+	 * @param newXValue - The new x value
+	 */
+	public void setX(double newXValue){
+		x = newXValue;
+	}
+	/**
+	 * Sets the y coordinate of this location to the specified value
+	 * @param newYValue - The new y value
+	 */
+	public void setY(double newYValue){
+		y = newYValue;
 	}
 	/**
 	 * Sets the coordinates of this location to the ones passed in.
@@ -149,6 +164,7 @@ public class Location extends Measurement<Location>{
 	 * is passed in with the coordinates (x1,y1) then first of all based on the camera the passed in location's coordinates will be converted to their "real"
 	 * values which are say (x2,y2) and then this location's coordinates will be set to (x2, y2). 
 	 * 
+	 * @deprecated
 	 * @param locationOnScreen the location on a screen whose "real" world coordinates will be assigned to this location
 	 * @param camera the camera that is viewing the passed location on screen
 	 * @see #Location(Location, StandardCamera)
@@ -224,7 +240,7 @@ public class Location extends Measurement<Location>{
 	}
 	/**
 	 * Makes the coordinate values of the passed in location match those of this location.
-	 * @param element
+	 * @param element - The location the coordinates of which are going to match those of this location.
 	 */
 	public void copyTo(Location element) {
 		element.duplicate(this);
@@ -238,5 +254,74 @@ public class Location extends Measurement<Location>{
 	public void magnify(double d){
 		x *= d;
 		y *= d;
+	}
+	/**
+	 * Checks and returns whether or not each of this location's coordinates is greater than the coordinates of the specified location.
+	 * 
+	 * @param comparedLocation - The location to which this location's coordinates are being compared to.
+	 * @return {@code true} if both the {@link #x} and the {@link #y} coordinates of this location are greater than those of the 
+	 * specified location.
+	 * <br>
+	 * {@code false} if either of the coordinates are not greater than those of the specified location.
+	 */
+	public boolean isGreaterThan(Location comparedLocation){
+		return x > comparedLocation.x && y > comparedLocation.y;
+	}
+	/**
+	 * Checks and returns whether or not each of this location's coordinates is greater than or equal to the coordinates of the specified location.
+	 * 
+	 * @param comparedLocation - The location to which this location's coordinates are being compared to.
+	 * @return {@code true} if both the {@link #x} and the {@link #y} coordinates of this location are greater than or equal to those of the 
+	 * specified location.
+	 * <br>
+	 * {@code false} if either of the coordinates are not greater than or equal to those of the specified location.
+	 */
+	public boolean isGreaterThanOrEqualTo(Location comparedLocation){
+		return isGreaterThan(comparedLocation) || equals(comparedLocation);
+	}
+	/**
+	 * Checks and returns whether or not each of this location's coordinates is less than the coordinates of the specified location.
+	 * 
+	 * @param comparedLocation - The location to which this location's coordinates are being compared to.
+	 * @return {@code true} if both the {@link #x} and the {@link #y} coordinates of this location are less than those of the 
+	 * specified location.
+	 * <br>
+	 * {@code false} if either of the coordinates are not less than those of the specified location.
+	 */
+	public boolean isLessThan(Location comparedLocation){
+		return x < comparedLocation.x && y < comparedLocation.y;
+	}
+	/**
+	 * Checks and returns whether or not each of this location's coordinates is less than or equal to the coordinates of the specified location.
+	 * 
+	 * @param comparedLocation - The location to which this location's coordinates are being compared to.
+	 * @return {@code true} if both the {@link #x} and the {@link #y} coordinates of this location less than or equal to those of the 
+	 * specified location.
+	 * <br>
+	 * {@code false} if either of the coordinates are not less than or equal to those of the specified location.
+	 */
+	public boolean isLessThanOrEqualTo(Location comparedLocation){
+		return isLessThan(comparedLocation) || equals(comparedLocation);
+	}
+	/**
+	 * Sets both of the coordinates of this location to their opposite. (Effectively multiplies each by -1). For example if a location had the 
+	 * coordinates (5.193, -132.2) then calling this function would change those coordinates to (-5.193, 132.2)
+	 */
+	public void negate(){
+		x = -x;
+		y = -y;
+	}
+	public Location getOpposite(){
+		return new Location(-x,-y);
+	}
+	public double getDegreeFromFulcrum(Location location){
+		return Math.asin((y - location.y) / (Math.hypot(y - location.y, x - location.x)));
+	}
+	public Location getReciprocal() {
+		return new Location(1/x,1/y);
+	}
+	public void magnify(Location amplification) {
+		x *= amplification.x;
+		y *= amplification.y;
 	}
 }

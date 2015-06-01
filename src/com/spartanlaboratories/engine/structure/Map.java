@@ -50,8 +50,8 @@ public abstract class Map extends StructureObject{
 	 * <br><b>false</b> if the actor is not within borders
 	 */
 	final public boolean withinBorders(Actor a){
-		return a.getLocation().x > 0 && a.getLocation().y > 0 &&
-				a.getLocation().x < engine.getWrap().x && a.getLocation().y < engine.getWrap().y;
+		return a.getLocation().isGreaterThanOrEqualTo(engine.getWrap().getOpposite()) 
+			&& a.getLocation().isLessThanOrEqualTo(engine.getWrap());
 	}
 	/**
 	 * Resets the number of movement points
@@ -62,19 +62,18 @@ public abstract class Map extends StructureObject{
 	public abstract void init();
 	/**
 	 * Draws every actor that is covered by the passed in camera. Also draws the border and the rune.
+	 * 
+	 * @deprecated
 	 * @param camera - The camera that is viewing the objects that are going to be drawn.
 	 */
 	public void drawMap(StandardCamera camera){
 		//for(TerrainObject a: terrain)
 			//if(camera.canSeeObject(a))a.drawMe(camera);
-		engine.tracker.giveStartTime(Tracker.RENDMAP_FINDACTORS);
 		ArrayList<VisibleObject> list = 
 				engine.qt.retrieveBox(	camera.worldLocation.x - camera.dimensions.x / 2, 
 										camera.worldLocation.y - camera.dimensions.y / 2,
 										camera.worldLocation.x + camera.dimensions.x / 2,
 										camera.worldLocation.y + camera.dimensions.y / 2 );
-		engine.tracker.giveEndTime(Tracker.RENDMAP_FINDACTORS);
-		engine.tracker.giveStartTime(Tracker.RENDMAP_DRAWACTORS);
 		for(VisibleObject vo: list)
 			if(Actor.class.isAssignableFrom(vo.getClass()))
 			try {
@@ -82,11 +81,8 @@ public abstract class Map extends StructureObject{
 			} catch (NullColorException e) {
 				e.printStackTrace();
 			}
-		engine.tracker.giveEndTime(Tracker.RENDMAP_DRAWACTORS);
-		engine.tracker.giveStartTime(Tracker.RENDMAP_OTHER);
 		drawBorder();
 		if(rune.active)engine.util.drawVO(rune, camera);
-		engine.tracker.giveEndTime(Tracker.RENDMAP_OTHER);
 	}
 	/**
 	 * When invoked goes through the list of all Spawn Points contained by this map and makes each one spawn one unit that it was set to spawn.

@@ -1,0 +1,32 @@
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Entity number: 17 took 0.000000000 seconds
+which is 0.00% of the time appropriated for a single tick
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Entity number: 17 took 0.000000000 seconds
+which is 0.00% of the time appropriated for a single tick
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Entity number: 17 took 0.000000000 seconds
+which is 0.00% of the time appropriated for a single tick
+Entity number: 17 took 0.000000000 seconds
+which is 0.00% of the time appropriated for a single tick
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Inserting 7 visible objects
+Entity number: 17 took 0.000000000 seconds
+which is 0.00% of the time appropriated for a single tick
+Inserting 7 visible objects
+Inserting 7 visible objects

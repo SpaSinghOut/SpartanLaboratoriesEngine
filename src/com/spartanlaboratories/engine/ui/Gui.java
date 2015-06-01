@@ -5,7 +5,6 @@ import javax.swing.*;
 import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.Image;
 
 import com.spartanlaboratories.engine.game.Ability;
 import com.spartanlaboratories.engine.game.Alive;
@@ -13,6 +12,7 @@ import com.spartanlaboratories.engine.game.Hero;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.Human;
+import com.spartanlaboratories.engine.structure.SLEImproperInputException;
 import com.spartanlaboratories.engine.util.Location;
 
 import java.awt.Component;
@@ -22,17 +22,16 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Gui extends JFrame implements KeyListener{
+public class Gui extends JFrame implements KeyListener, MouseListener{
 	public HashMap<String, ArrayList<Component>> interfaceElements = new HashMap<String, ArrayList<Component>>();
 	public static String[] componentVisibilities = { "Actor", "Alive", "Hero", "Special"};
 	Engine engine;
-	public Canvas canvas;
-	BufferedImage image;
-	Image slickImage;
 	public final int screenX;
 	public final int screenY;
 	JLabel HUD_component_level, HUD_component_health_number, HUD_component_health_bar,
@@ -40,8 +39,6 @@ public class Gui extends JFrame implements KeyListener{
 	HUD_component_mana_bar, HUD_component_mana_number, HUD_component_move_speed, 
 	HUD_component_attack_speed, HUD_component_armor, HUD_component_gold, HUD_component_pause;
 	public JLabel HUD_component_clock;
-	JLabel bcg;
-	private JPanel inventory;
 	LevelUpButton levelUpButton;
 	public ArrayList<BuffIcon> buffs = new ArrayList<BuffIcon>();
 	JTextArea description, rsBox;JScrollPane scrollPane;
@@ -49,6 +46,7 @@ public class Gui extends JFrame implements KeyListener{
 	Human owner;
 	public GraphicalConsole console;
 	JMenuBar menuBar;
+	public Canvas canvas = new Canvas();
 	 //For the following: *** CONSTRUCTOR INITIALIZATION ONLY *** (dependent on gui being initialized)
 	final int healthBarMaxWidth;
 	final int healthBarHeight;
@@ -63,10 +61,16 @@ public class Gui extends JFrame implements KeyListener{
 		screenX = (int) engine.getScreenDimensions().x;
 		screenY = (int) engine.getScreenDimensions().y;
 		setUndecorated(false);
-		setVisible(true);
-		canvas = new Canvas();
-		setBounds(0, 0, (int)engine.getScreenDimensions().x, (int)engine.getScreenDimensions().y);
-		getContentPane().add(canvas, 0);
+		
+		getContentPane().addKeyListener(this);
+		canvas.setLocation(0,0);
+		canvas.setSize(screenX, screenY);
+		canvas.setVisible(true);
+		canvas.setEnabled(true);
+		getContentPane().addMouseListener(this);
+		
+		setSize(screenX,screenY);
+		getContentPane().add(canvas,0);
 		getLayeredPane().add(getContentPane(),0);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -74,6 +78,7 @@ public class Gui extends JFrame implements KeyListener{
 		healthBarHeight = (int) (engine.getScreenDimensions().y / 30);
 		customStats = new int[numberOfCustomStats];
 		initHUD();
+		setVisible(true);
 	}
 	/**
 	 * Sets default parameters for the items shop and adds it the the
@@ -84,11 +89,6 @@ public class Gui extends JFrame implements KeyListener{
 		shop.setSize((int)(screenX * .15), (int)(screenY * 0.032));
 		shop.setVisible(true);
 		getLayeredPane().add(shop);
-	}
-	final private void initBcg(){
-		bcg = new JLabel();
-		getLayeredPane().add(bcg);
-		bcg.addKeyListener(this);
 	}
 	final private void initHUD() {
 		abilityPoints = new StateChangingButton(this);
@@ -183,10 +183,6 @@ public class Gui extends JFrame implements KeyListener{
 		description.setSize((int)(screenX * .113), (int)(screenY * .131));
 		description.setLocation((int)(screenX * .345),(int)(screenY * .622));
 		description.setVisible(false);
-		inventory = new JPanel();
-		inventory.setLocation((int)(screenX * .68), (int)(screenY * .775));
-		inventory.setSize((int)(screenX * .0645), (int)(screenY * 0.0895));
-		inventory.setVisible(true);
 		addComponent("Alive", HUD_component_level);
 		addComponent("Alive", HUD_component_health_number);
 		addComponent("Alive", HUD_component_health_bar);
@@ -203,7 +199,6 @@ public class Gui extends JFrame implements KeyListener{
 		addComponent("Actor", HUD_component_clock);
 		addComponent("Special", HUD_component_pause);
 		for(JLabel l: HUD_component_custom_stats)addComponent("Alive", l);
-		initBcg();
 		console = new GraphicalConsole(this);
 		for(int i = 0; i < 10; i++){
 			buffs.add(new BuffIcon(this, i));
@@ -221,9 +216,8 @@ public class Gui extends JFrame implements KeyListener{
 	private int percentY(double d){return (Integer)((int)(d * screenY / 100));}
 	public void tick(){
 		if(!console.consoleInput.hasFocus())
-			//bcg.requestFocusInWindow()
+			getContentPane().requestFocusInWindow();
 			;
-		
 		if(owner.selectedUnit==null||!Alive.class.isAssignableFrom(owner.selectedUnit.getClass()))return;
 		
 		Alive a = (Alive) owner.selectedUnit;
@@ -327,17 +321,8 @@ public class Gui extends JFrame implements KeyListener{
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		switch(arg0.getKeyCode()){
-		case KeyEvent.VK_LEFT:
-			owner.getPrimaryCamera().worldLocation.changeX(-owner.getPrimaryCamera().getCameraSpeed());
-			break;
-		case KeyEvent.VK_RIGHT:
-			owner.getPrimaryCamera().worldLocation.changeX(owner.getPrimaryCamera().getCameraSpeed());
-			break;
-		case KeyEvent.VK_DOWN:
-			owner.getPrimaryCamera().worldLocation.changeY(owner.getPrimaryCamera().getCameraSpeed());
-			break;
-		case KeyEvent.VK_UP:
-			owner.getPrimaryCamera().worldLocation.changeY(-owner.getPrimaryCamera().getCameraSpeed());
+		case KeyEvent.VK_LEFT:case KeyEvent.VK_RIGHT:case KeyEvent.VK_DOWN:	case KeyEvent.VK_UP:
+			owner.getPrimaryCamera().handleKeyPress(arg0);;
 			break;
 		}
 	}
@@ -367,19 +352,14 @@ public class Gui extends JFrame implements KeyListener{
 			}catch(ArrayIndexOutOfBoundsException e){
 				console.out("Spacebar cannot make the player focus on a unit because the player does not own one");
 			}
-			owner.getPrimaryCamera().worldLocation.setCoords(owner.selectedUnit.getLocation().x, owner.selectedUnit.getLocation().y);
-			break;
-		case KeyEvent.VK_LEFT:
-			owner.getPrimaryCamera().resetCameraSpeed();
-			break;
-		case KeyEvent.VK_RIGHT:
-			owner.getPrimaryCamera().resetCameraSpeed();
-			break;
-		case KeyEvent.VK_DOWN:
-			owner.getPrimaryCamera().resetCameraSpeed();
-			break;
-		case KeyEvent.VK_UP:
-			owner.getPrimaryCamera().resetCameraSpeed();
+			try {
+				owner.coveringCamera(owner.getMouseLocationG()).handleKeyPress(arg0);
+			} catch (SLEImproperInputException e) {
+				System.out.println("Spacebar was pressed while the mouse was outside the scope of any camera.");
+				System.out.println("Using the default camera instead");
+				owner.getPrimaryCamera().handleKeyPress(arg0);
+				e.printStackTrace();
+			}
 			break;
 		case KeyEvent.VK_ESCAPE:
 			engine.running = false;
@@ -408,7 +388,7 @@ public class Gui extends JFrame implements KeyListener{
 	}
 	public void clearInterface() {
 		for(int i = 0; i < interfaceElements.size(); i++)
-			if(interfaceElements.containsKey(componentVisibilities[i]))
+			if(!componentVisibilities[i].equals("Special") && interfaceElements.containsKey(componentVisibilities[i]))
 				for(Component c: interfaceElements.get(componentVisibilities[i])){
 					c.setVisible(false);
 					c.update(c.getGraphics());
@@ -435,5 +415,51 @@ public class Gui extends JFrame implements KeyListener{
 		default: throw new IllegalArgumentException();
 		}
 		this.update(getGraphics());
+	}
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		int button = 3;
+		switch(e.getButton()){
+		case MouseEvent.BUTTON1:
+			button = 1;
+			break;
+		case MouseEvent.BUTTON2:
+			button = 3;
+			break;
+		case MouseEvent.BUTTON3:
+			button = 2;
+			break;
+		}
+		console.out(owner.getMouseLocationG());
+		owner.setMouseButtonDown(button, true);
+	}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		int button = 3;
+		switch(e.getButton()){
+		case MouseEvent.BUTTON1:
+			button = 1;
+			break;
+		case MouseEvent.BUTTON2:
+			button = 3;
+			break;
+		case MouseEvent.BUTTON3:
+			button = 2;
+			break;
+		}
+		console.out(String.valueOf(button));
+		owner.setMouseButtonDown(button, false);
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {
+		
 	}
 }

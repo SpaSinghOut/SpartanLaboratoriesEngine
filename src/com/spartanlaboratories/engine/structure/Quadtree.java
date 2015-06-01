@@ -2,9 +2,11 @@ package com.spartanlaboratories.engine.structure;
 
 import java.util.ArrayList;
 
+import com.spartanlaboratories.engine.game.Actor;
 import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.util.Location;
+import com.spartanlaboratories.engine.util.Rectangle;
 
 /**<b> One of the most important classes in the entire engine: The Quadtree</b>
  * <p>
@@ -42,6 +44,24 @@ final public class Quadtree<Number extends Comparable, Element> extends Structur
 		root = insert(root, x, y, element);
 	}
 	
+	//************************* retrieval ******************************
+	public ArrayList<Element> retrieveBox(Number minX, Number minY, Number maxX, Number maxY) {
+		ArrayList<Element> arrayList = new ArrayList<Element>();
+		retrieveBox(root, minX, minY, maxX, maxY, arrayList);
+		return arrayList;
+	}
+	public ArrayList<Actor> retriveActors(Number minX, Number minY, Number maxX, Number maxY){
+		ArrayList<Actor> list = new ArrayList<Actor>();
+		retrieveActors(root, minX, minY, maxX, maxY, list);
+		return list;
+	}
+	public void clear(){
+		root = null;
+		if(engine.util.everySecond(1))engine.tracker.log("Inserting " + engine.visibleObjects.size() + " visible objects");
+		for(VisibleObject a: engine.visibleObjects)
+			engine.qt.insert(a.getLocation().x, a.getLocation().y, a);
+	}
+
 	private Node insert(Node node, Number x, Number y, Element element) {
 		if(node == null) return new Node(x, y, element);
 		
@@ -59,12 +79,20 @@ final public class Quadtree<Number extends Comparable, Element> extends Structur
 		else if( lessX &&  lessY) node.southWest = insert(node.southWest, x, y, element);
 		return node;
 	}
-	
-	//************************* retrieval ******************************
-	public ArrayList<Element> retrieveBox(Number minX, Number minY, Number maxX, Number maxY) {
-		ArrayList<Element> arrayList = new ArrayList<Element>();
-		retrieveBox(root, minX, minY, maxX, maxY, arrayList);
-		return arrayList;
+
+	private void retrieveActors(Node node, Number minX, Number minY, Number maxX, Number maxY, ArrayList<Actor> list){
+		if(node == null) return;
+		
+		boolean lessMinX = minX.compareTo(node.x) < 0;
+		boolean lessMinY = minY.compareTo(node.y) < 0;
+		boolean lessMaxX = maxX.compareTo(node.x) < 0;
+		boolean lessMaxY = maxY.compareTo(node.y) < 0;
+		
+		if(Actor.class.isAssignableFrom(node.element.getClass()) && lessMinX && lessMinY && !lessMaxX && !lessMaxY && node.element != null) list.add((Actor) node.element);
+		if( lessMinX && !lessMaxY) retrieveActors(node.northWest, minX, minY, maxX, maxY, list);
+		if(!lessMaxX && !lessMaxY) retrieveActors(node.northEast, minX, minY, maxX, maxY, list);
+		if(!lessMaxX &&  lessMinY) retrieveActors(node.southEast, minX, minY, maxX, maxY, list);
+		if( lessMinX &&  lessMinY) retrieveActors(node.southWest, minX, minY, maxX, maxY, list);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -102,12 +130,7 @@ final public class Quadtree<Number extends Comparable, Element> extends Structur
 		else if(!lessX &&  lessY) remove(node.southEast, x, y, element);
 		else if( lessX &&  lessY) remove(node.southWest, x, y, element);
 	}
-	public void clear(){
-		root = null;
-		if(engine.util.everySecond(1))engine.tracker.log("Inserting " + engine.allActors.size() + " visible objects");
-		for(VisibleObject a: engine.visibleObjects)
-			engine.qt.insert(a.getLocation().x, a.getLocation().y, a);
-	}
+	@Deprecated
 	public ArrayList<Alive> getAlivesAroundMe(Alive alive, int area){
 		ArrayList<VisibleObject> box = engine.qt.retrieveBox(alive.getLocation().x - area, 
 				alive.getLocation().y - area, alive.getLocation().x + area,alive.getLocation().y + area);
@@ -117,6 +140,7 @@ final public class Quadtree<Number extends Comparable, Element> extends Structur
 				ala.add((Alive) a);
 		return ala;
 	}
+	@Deprecated
 	public ArrayList<Alive> getAlivesAroundLocation(Location location){
 		ArrayList<VisibleObject> ala = engine.qt.retrieveBox(location.x - 100, location.y - 100, location.x + 100, location.y + 100);
 		ArrayList<Alive> all = new ArrayList<Alive>();

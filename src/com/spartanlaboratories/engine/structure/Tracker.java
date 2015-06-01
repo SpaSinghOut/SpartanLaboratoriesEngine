@@ -10,8 +10,8 @@ import com.spartanlaboratories.engine.util.Location;
 public final class Tracker extends StructureObject {
 	private int tickRate = Engine.tickRate;
 	private double notifyPeriod;
-	private static final int numberOfTrackedEntities = 20;
-	public boolean[] trackedEntities = new boolean[numberOfTrackedEntities];
+	private static int numberOfTrackedEntities = 17;
+	private boolean[] trackedEntities = new boolean[numberOfTrackedEntities];
 	Location[] recordedTimes = new Location[numberOfTrackedEntities];
 	Location[] entityStats = new Location[numberOfTrackedEntities];
 	String[] entityNames = new String[numberOfTrackedEntities];
@@ -21,15 +21,14 @@ public final class Tracker extends StructureObject {
 	int ticksTracked;
 	private int secondTracked;
 	public static final int ALG_UNIT_SELECTION = 0, FUNC_TICK = 1, FUNC_RENDER = 2, FUNC_QUADTREE_RESET = 3, FUNC_HERO_OWNER_TICK = 4,
-	FUNC_MAP_TICK = 5, FUNC_MISSILE_TICK = 6, FUNC_AURA_TICK = 7, FUNC_ACTOR_DELETION = 8, REND_MISSILE = 9, REND_MAP = 10, REND_HUMAN = 11, 
-	REND_HEROES = 12, REND_HUMAN_GUI = 13, REND_HUMAN_PORTRAITS = 14, REND_HUMAN_MAP = 15, REND_HUMAN_NUKEPATH = 16, RENDMAP_FINDACTORS = 17,
-	RENDMAP_DRAWACTORS = 18, RENDMAP_OTHER = 19;
+	FUNC_MAP_TICK = 5, FUNC_MISSILE_TICK = 6, FUNC_AURA_TICK = 7, FUNC_ACTOR_DELETION = 8,  REND_PLAYER = 11, 
+	REND_HUMAN_GUI = 13, REND_PORTRAIT = 14, REND_QUADS = 15, TICK_AMBIENT = 16;
 	Tracker(Engine engine){
 		super(engine);
 		setNotifyPeriod(15);
 	}
 	public enum TrackerPreset{
-		PRESET_RUN, PRESET_TICK, PRESET_RENDER, PRESET_REND_HUMAN,PRESET_REND_MAP,;
+		PRESET_RUN, PRESET_TICK, PRESET_RENDER, PRESET_REND_HUMAN;
 	}
 	public void initialize(){
 		try {
@@ -42,11 +41,9 @@ public final class Tracker extends StructureObject {
 		secondTracked = 0;
 		initEntityNames();
 		for(int i = 0; i < numberOfTrackedEntities; i++){
-			if(trackedEntities[i]){
-				recordedTimes[i] = new Location(0,0);
-				entityStats[i] = new Location(0,0);
-				lifespanStats[i] = new Location(0,0);
-			}
+			recordedTimes[i] = new Location(0,0);
+			entityStats[i] = new Location(0,0);
+			lifespanStats[i] = new Location(0,0);
 		}
 	}
 	public void initialize(TrackerPreset trackerPreset){
@@ -62,26 +59,23 @@ public final class Tracker extends StructureObject {
 			setEntityTracked(FUNC_MISSILE_TICK, true);
 			setEntityTracked(FUNC_AURA_TICK, true);
 			setEntityTracked(FUNC_ACTOR_DELETION, true);
+			setEntityTracked(TICK_AMBIENT, true);
 			break;
 		case PRESET_RENDER:
-			setEntityTracked(REND_MISSILE, true);
-			setEntityTracked(REND_MAP, true);
-			setEntityTracked(REND_HUMAN, true);
-			setEntityTracked(REND_HEROES, true);
+			setEntityTracked(REND_PLAYER, true);
 			break;
 		case PRESET_REND_HUMAN:
 			setEntityTracked(REND_HUMAN_GUI, true);
-			setEntityTracked(REND_HUMAN_PORTRAITS, true);
-			setEntityTracked(REND_HUMAN_MAP, true);
-			setEntityTracked(REND_HUMAN_NUKEPATH, true);
-			break;
-		case PRESET_REND_MAP:
-			setEntityTracked(RENDMAP_FINDACTORS, true);
-			setEntityTracked(RENDMAP_DRAWACTORS, true);
-			setEntityTracked(RENDMAP_OTHER, true);
+			setEntityTracked(REND_PORTRAIT, true);
+			setEntityTracked(REND_QUADS, true);
 			break;
 		}
 		initialize();
+	}
+	public void clearTrackedEntities(){
+		for(int i = 0; i < trackedEntities.length; i++){
+			setEntityTracked(i, false);
+		}
 	}
 	public void setNotifyPeriod(int seconds){
 		notifyPeriod = seconds;
@@ -148,6 +142,34 @@ public final class Tracker extends StructureObject {
 	public void printAndLog(String string){
 		System.out.println(string);
 		log(string);
+	}
+	public int addEntity(){
+		++numberOfTrackedEntities;
+		/*
+		boolean[] trackedEntities = new boolean[numberOfTrackedEntities];
+		Location[] recordedTimes = new Location[numberOfTrackedEntities];
+		Location[] entityStats = new Location[numberOfTrackedEntities];
+		Location[] lifespanStats = new Location[numberOfTrackedEntities];
+		String[] entityNames = new String[numberOfTrackedEntities];
+		for(int i = 0; i < numberOfTrackedEntities - 1; i++){
+			trackedEntities[i] = this.trackedEntities[i];
+			recordedTimes[i].duplicate(this.recordedTimes[i]);
+			entityStats[i].duplicate(this.entityStats[i]);
+			lifespanStats[i].duplicate(this.lifespanStats[i]);
+			entityNames[i] = this.entityNames[i];
+		}
+		this.trackedEntities = trackedEntities;
+		this.recordedTimes = recordedTimes;
+		this.entityStats = entityStats;
+		this.lifespanStats  = lifespanStats;
+		this.entityNames = entityNames;
+		*/
+		trackedEntities = new boolean[numberOfTrackedEntities];
+		recordedTimes = new Location[numberOfTrackedEntities];
+		entityStats = new Location[numberOfTrackedEntities];
+		entityNames = new String[numberOfTrackedEntities];
+		lifespanStats = new Location[numberOfTrackedEntities];
+		return numberOfTrackedEntities - 1;
 	}
 	private void initEntityNames(){
 		entityNames[0] = "Unit Selection"; entityNames[1] = "Tick"; entityNames[2] = "Render"; entityNames[3] = "Quadtree reset";

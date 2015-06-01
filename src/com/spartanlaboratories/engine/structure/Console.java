@@ -97,12 +97,12 @@ public class Console extends StructureObject{
 				break;
 			case "resetHeroLocation":
 				owner.gui.out("Executing command: " + command.commandName);
-				owner.hero.setLocation(new Location(engine.getScreenDimensions().x / 2, 750));
+				owner.controlledUnits.get(0).setLocation(0,0);
 				break;	
 			case "setHeroLocation":
 				owner.gui.out("Executing command: " + command.commandName);
 				owner.gui.out("Setting hero location to: " + command.numericParameters[0] + ", " + command.numericParameters[1]);
-				owner.hero.setLocation(new Location(command.numericParameters[0], command.numericParameters[1]));
+				owner.controlledUnits.get(0).setLocation(new Location(command.numericParameters[0], command.numericParameters[1]));
 				owner.cameras.get(0).worldLocation = new Location(command.numericParameters[0], command.numericParameters[1]);
 				break;
 			case "changeAbilityLevel":
@@ -319,5 +319,8 @@ public class Console extends StructureObject{
 			}
 			return true;
 		}
+	}
+	public void out(Location location) {
+		out(location.toString());
 	}
 }

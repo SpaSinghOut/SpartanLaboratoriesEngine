@@ -2,6 +2,7 @@ package com.spartanlaboratories.engine.game;
 
 import java.util.ArrayList;
 
+import com.spartanlaboratories.engine.structure.Camera;
 import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
@@ -17,7 +18,7 @@ public class Alive extends Actor{
 	double damageMultiplier;
 	private double[] stats;
 	public Faction faction;
-	public Alive attackTarget;
+	protected Alive attackTarget;
 	private AttackState attackState;
 	protected ArrayList<Buff> buffs = new ArrayList<Buff>();
 	public static ArrayList<Alive> allAlives = new ArrayList<Alive>();
@@ -91,7 +92,12 @@ public class Alive extends Actor{
 			changePermissions(Constants.movementAllowed, false);
 		else changePermissions(Constants.movementAllowed, true);
 		alive = getStat(Constants.health) > 0;
+		updateHealthBar();
 		return super.tick() && alive;
+	}
+	private void updateHealthBar() {
+		healthBar.setWidth(getWidth() * getRatio("health"));
+		healthBar.setLocation(getLocation().x - getWidth() * (1-getRatio("health")) / 2, healthBar.getLocation().y);
 	}
 	public void heal(int heal){
 		stats[Constants.health] += heal;
@@ -149,8 +155,7 @@ public class Alive extends Actor{
 			if(b.activationTrigger == Buff.TriggerType.ONATTACK)
 				b.trigger(attacking);
 		if(missile){
-			Missile attackMissile = new Missile(attackMissileType, this, attacking);
-			attackMissile.setAuto(true);
+			Missile attackMissile = new Missile(this, attacking);
 			attackMissile.setDamage(getStat(Constants.damage));
 		}
 		else attacking.getAttacked(this);
@@ -332,7 +337,7 @@ public class Alive extends Actor{
 		}
 	}
 	public float getRatio(String ratioType){
-		switch(ratioType){
+		switch(ratioType.toLowerCase()){
 		case "health":
 			return (((float)(stats[Constants.health])) / ((float)(stats[Constants.maxHealth])));
 		case "mana":
@@ -361,14 +366,16 @@ public class Alive extends Actor{
 	 */
 	public void aggroOn(Alive setTarget){
 		if(setTarget == attackTarget)return;
-		if(setTarget != null)setAttackState(AttackState.SELECTED);
+		if(setTarget != null){
+			setAttackState(AttackState.SELECTED);
+			for(Buff b: getBuffs())
+				if(b.activationTrigger == Buff.TriggerType.ONAGGRO)
+					b.trigger(setTarget);
+		}
 		else{
 			setAttackState(AttackState.NONE);
 			resetAllAttackCDs();
 		}
-		for(Buff b: getBuffs())
-			if(b.activationTrigger == Buff.TriggerType.ONAGGRO)
-				b.trigger(setTarget);
 		attackTarget = setTarget;
 	}
 	public Buff[] getBuffsOfType(String bn){
@@ -388,17 +395,19 @@ public class Alive extends Actor{
 			needToMove = allowed;
 			break;
 		case Constants.spellCastAllowed:
-			if(allowed)for(Buff b:getBuffs())if(b.buffName == "stun" || 
-			b.buffName == "silence");
-			else permissions[permission] = allowed;
+			if(allowed)for(Buff b:getBuffs())
+				if(b.buffName == "stun" || b.buffName == "silence");
+				else permissions[permission] = allowed;
+			break;
 		case Constants.channelingAllowed:
-			if(allowed)for(Buff b:getBuffs())if(b.buffName == "stun" || 
-			b.buffName == "silence");
-			else permissions[permission] = allowed;
+			if(allowed)for(Buff b:getBuffs())
+				if(b.buffName == "stun" || b.buffName == "silence");
+				else permissions[permission] = allowed;
 			break;
 		case Constants.autoAttackAllowed:
-			if(allowed)for(Buff b:getBuffs())if(b.buffName == "stun");
-			else permissions[permission] = allowed;
+			if(allowed)for(Buff b:getBuffs())
+				if(b.buffName == "stun");
+				else permissions[permission] = allowed;
 			break;
 		default: permissions[permission] = allowed;
 		}
@@ -467,12 +476,18 @@ public class Alive extends Actor{
 		a.stats = new double[stats.length];
 		for(int i = 0; i < stats.length; i++)a.stats[i] = stats[i];
 	}
-	public void rightClick(Location locationOnScreen, StandardCamera camera){
-		Human owner = (Human)this.owner;
-		Actor selected = owner.selected(locationOnScreen);
-		Alive targetedUnit = (Alive) (selected==null?null:Alive.class.isAssignableFrom(selected.getClass())?selected:null);
-		if(targetedUnit!=null)aggroOn(targetedUnit);
-		else super.rightClick(locationOnScreen, camera);
+	@Override
+	public void rightClick(Location locationOnScreen, Camera camera){
+		Actor selected = camera.unitAt(locationOnScreen.copy());
+		Alive targetedUnit = (Alive) (selected==null?null:Alive.class.isAssignableFrom(selected.getClass())?(selected.equals(this)?null:selected):null);
+		aggroOn(targetedUnit);
+		if(targetedUnit == null) super.rightClick(locationOnScreen, camera);
+	}
+	@Override
+	public void trashComponents(){
+		super.trashComponents();
+		healthBar.active = false;
+		engine.visibleObjects.remove(healthBar);
 	}
 	private void regen(){
 		if(getClass() == Hero.class){
@@ -497,33 +512,18 @@ public class Alive extends Actor{
 		needToMove = attackTarget == null && target != null;
 		changePermissions(Constants.movementAllowed, attackTarget == null && target != null);
 		if(attackTarget == null || !attackTarget.alive){
-			if(getAttackState() != AttackState.NONE)
-				setAttackState(Alive.AttackState.NONE);
+			setAttackState(Alive.AttackState.NONE);
 			needToMove = true;
 		}
-		else if(attackState == AttackState.NONE && attackTarget == null){
-			needToMove = true;
-		}
-		else if(attackState == AttackState.NONE && attackTarget != null && attackTarget.active){
-			aggroOn(attackTarget);
-		}
-		else if(attackState == AttackState.NONE && attackTarget != null && !attackTarget.active){
-			attackTarget = null;
+		else if(attackTarget != null && !attackTarget.active){
+			aggroOn(null);
 		}
 		else if(attackState == AttackState.SELECTED){
-			if(attackTarget == null){
-				needToMove = true;
-				this.setAttackState(Alive.AttackState.NONE);
-				target = null;
-				return;
-			}
 			if(!isVisible(attackTarget)){
-				attackTarget = null;
-				needToMove = true;
-				target = null;
+				aggroOn(null);
+				needToMove = false;
 			}
-			else if(isVisible(attackTarget)){
-				if(isAttackTargetWithinAttackRange()){
+			else if(isAttackTargetWithinAttackRange()){
 					issueAttack(attackTarget);
 					attackTarget.getTargeted(this);
 					setAttackState(Alive.AttackState.ANIMATION);
@@ -533,14 +533,8 @@ public class Alive extends Actor{
 					setAttackState(AttackState.MOVING);
 					needToMove = true;
 				}
-			}
 		}
 		else if(this.attackState == Alive.AttackState.MOVING){
-			if(attackTarget == null){
-				needToMove = true;
-				setAttackState(Alive.AttackState.NONE);
-				return;
-			}
 			if(!isAttackTargetWithinAttackRange()){
 			needToMove = true;
 			target = attackTarget.getLocation();
@@ -560,7 +554,7 @@ public class Alive extends Actor{
 			this.doAttack(attackTarget);
 		}
 		else if(attackState == AttackState.RETRACTION && stats[Constants.retractionCD] > 0){
-			if(noRetraction)this.setAttackState(AttackState.WAIT);
+			if(noRetraction)setAttackState(AttackState.WAIT);
 			stats[Constants.retractionCD]--;
 		}
 		else if(attackState == AttackState.RETRACTION && stats[Constants.retractionCD] <= 0){

@@ -44,15 +44,20 @@ public abstract class GameObject extends StructureObject{
 		return active;
 	}
 	/**
-	 * Returns a new GameObject that is a copy of this GameObject
+	 * Returns a new GameObject that is a copy of this GameObject. This is an abstract method and is meant to leave the actual copying to the subclasses.
+	 * However, there does exist the {@link #copyTo(GameObject)} method which should make things much easier for the subclasses.
 	 * @return a new GameObject that is a copy of this GameObject
 	 */
 	public abstract GameObject copy();
-	
+	/**
+	 * This method copies all of the values associated with this object to the object specified.
+	 * @param vo - The object whose values will be changed to those of this object.
+	 */
 	protected void copyTo(GameObject vo){
 		vo.active = active;
+		vo.ownedObjects.clear();
 		for(GameObject go: ownedObjects)vo.ownedObjects.add(go);
-		vo.location = getLocation();
+		vo.location.duplicate(location);
 	}
 	protected abstract void updateComponentLocation();
 	/**
@@ -67,12 +72,18 @@ public abstract class GameObject extends StructureObject{
 	/**
 	 * Changes the coordinates of this object's location by the coordinates of the passed in location.
 	 * @param locChange the location whose coordinates will be used as modifying values for this object's location's coordinates
-	 * @see <a href="Location.html">Location</a>
+	 * @see #changeLocation(double, double)
 	 */
 	public void changeLocation(Location locChange){
 		location.change(locChange);
 		updateComponentLocation();
 	}
+	/**
+	 * Changes the coordinates of this location by those that are specified in the parameters.
+	 * 
+	 * @param x - the net change in the x coordinate
+	 * @param y - the net change in the y coordinate
+	 */
 	public void changeLocation(double x, double y){
 		location.change(x, y);
 		updateComponentLocation();
@@ -86,9 +97,19 @@ public abstract class GameObject extends StructureObject{
 		this.location.duplicate(location);
 		updateComponentLocation();
 	}
+	/**
+	 * Sets the location to the specified coordinates. Identical to {@link #setLocation(Location)}
+	 * 
+	 * @param x - The new x coordinate of this object's location
+	 * @param y - the new y coordinate of this object's location
+	 */
 	public void setLocation(double x, double y) {
 		location.setCoords(x,y);
 		updateComponentLocation();
 	}
+	/**
+	 * An abstract method that is meant to be overridden by subclasses that want to perform a specific action every time the engine updates.
+	 * 
+	 */
 	public abstract void update();
 }

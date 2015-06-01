@@ -1,5 +1,6 @@
 package com.spartanlaboratories.engine.game;
 
+import com.spartanlaboratories.engine.structure.Camera;
 import com.spartanlaboratories.engine.structure.StandardCamera;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Controller;
@@ -64,10 +65,10 @@ public class Actor extends VisibleObject implements AcceptsInput{
 	 * Updates the direction in which this actor is heading
 	 * @param setTarget the target location of this actor
 	 */
-	public void setMovement(Location setTarget){
+	protected void setMovement(Location setTarget){
 		double xChange;
 		double yChange;
-		double hypotenuse = Math.sqrt(Math.abs(Math.pow((getLocation().x - setTarget.x),2) + Math.pow((getLocation().y - setTarget.y), 2))) ;
+		double hypotenuse = Math.hypot(getLocation().x - setTarget.x,getLocation().y - setTarget.y) ;
 		xChange = -( getTrueSpeed() * (getLocation().x - setTarget.x) / hypotenuse);
 		yChange = -( getTrueSpeed() * (getLocation().y - setTarget.y) / hypotenuse);
 		locChange = new Location(xChange, yChange);
@@ -195,8 +196,8 @@ public class Actor extends VisibleObject implements AcceptsInput{
 		a.movementType = movementType;
 	}
 	@Override
-	public void rightClick(Location locationOnScreen, StandardCamera camera) {
-		setTarget(Location.getLocationInWorld(locationOnScreen, camera));
+	public void rightClick(Location locationOnScreen, Camera camera) {
+		setTarget(camera.getWorldLocation(locationOnScreen));
 	}
 	@Override
 	public void leftClick(Location locationOnScreen, StandardCamera camera) {
@@ -237,8 +238,7 @@ public class Actor extends VisibleObject implements AcceptsInput{
 		Location old = new Location(getLocation());
 		int rotation = 0;
 		//if closer to target than own speed teleport there
-		if(engine.util.getRealCentralDistance(this, target) < getTrueSpeed()){
-			System.out.println("test");
+		if(engine.util.getDistanceFromCenter(this, target) < getTrueSpeed()){
 			setLocation(target);
 			return;
 		}

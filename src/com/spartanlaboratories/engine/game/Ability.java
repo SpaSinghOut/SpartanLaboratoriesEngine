@@ -10,6 +10,7 @@ import javax.xml.stream.XMLStreamReader;
 import com.spartanlaboratories.engine.structure.Constants;
 import com.spartanlaboratories.engine.structure.Engine;
 import com.spartanlaboratories.engine.structure.Human;
+import com.spartanlaboratories.engine.structure.SLEImproperInputException;
 import com.spartanlaboratories.engine.structure.Util;
 import com.spartanlaboratories.engine.util.Location;
 
@@ -189,7 +190,7 @@ public abstract class Ability implements Castable{
 		}
 		castControl--;
 	}
-	public void activate(){
+	public void activate() throws SLEImproperInputException{
 		CDRemaining = abilityStats.CD;
 		durationLeft = abilityStats.duration;
 		switch(abilityStats.castType){
@@ -203,7 +204,9 @@ public abstract class Ability implements Castable{
 			break;
 		case POINTTARGET:
 			if(owner.owner.getClass() == Human.class){
-				targetLocation.setFromScreen(((Human)owner.owner).getMouseLocation(), ((Human)owner.owner).getPrimaryCamera());
+				Human human = ((Human)owner.owner);
+				Location loc = human.getMouseLocationG();
+				targetLocation.duplicate(human.coveringCamera(loc).getWorldLocation(loc));
 			}
 			activate(targetLocation);
 			state = State.DOWN;
@@ -217,7 +220,9 @@ public abstract class Ability implements Castable{
 			&& owner.getPermissions(Constants.spellCastAllowed)){
 				state = State.CHANNELING;
 				if(owner.owner.getClass() == Human.class){
-					targetLocation.setFromScreen(((Human)owner.owner).getMouseLocation(), ((Human)owner.owner).getPrimaryCamera());
+					Human human = ((Human)owner.owner);
+					Location loc = human.getMouseLocationG();
+					targetLocation.duplicate(human.coveringCamera(loc).getWorldLocation(loc));
 				}
 				state = State.DOWN;
 			}
@@ -272,6 +277,11 @@ public abstract class Ability implements Castable{
 			state = State.READY;
 		level++;
 		if(abilityStats.castType == Castable.CastType.PASSIVE)
-			activate();
+			try {
+				activate();
+			} catch (SLEImproperInputException e) {
+				System.out.println("Improper input exception when levelling passive ability");
+				e.printStackTrace();
+			}
 	}
 }
