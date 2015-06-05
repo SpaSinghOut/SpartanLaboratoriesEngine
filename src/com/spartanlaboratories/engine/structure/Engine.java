@@ -179,6 +179,7 @@ public class Engine{
 			logic.start();
 		}
 		//new Thread(new RunThread(2)).start();
+		time = System.nanoTime();
 		while(running)
 		if(System.nanoTime() > time + 1000000000 / Engine.tickRate){
 			time += 1000000000 / Engine.tickRate;

@@ -11,6 +11,7 @@ public final class Tracker extends StructureObject {
 	private int tickRate = Engine.tickRate;
 	private double notifyPeriod;
 	private static int numberOfTrackedEntities = 17;
+	private int[] timesCalled = new int[numberOfTrackedEntities];
 	private boolean[] trackedEntities = new boolean[numberOfTrackedEntities];
 	Location[] recordedTimes = new Location[numberOfTrackedEntities];
 	Location[] entityStats = new Location[numberOfTrackedEntities];
@@ -87,6 +88,7 @@ public final class Tracker extends StructureObject {
 					//displayEntityStats(i);
 					displayLifespanStats(i);
 			}
+			showComparison();
 			logLifespanStats();
 		}
 		if(engine.util.everySecond(5))logLifespanStats();
@@ -102,6 +104,7 @@ public final class Tracker extends StructureObject {
 		trackedEntities[entityIdentity] = toTrackOrNotToTrack;
 	}
 	public void giveStartTime(int entityIdentity){
+		++timesCalled[entityIdentity];
 		if(trackedEntities[entityIdentity])
 		recordedTimes[entityIdentity].x = System.nanoTime();
 	}
@@ -164,6 +167,7 @@ public final class Tracker extends StructureObject {
 		this.lifespanStats  = lifespanStats;
 		this.entityNames = entityNames;
 		*/
+		timesCalled = new int[numberOfTrackedEntities];
 		trackedEntities = new boolean[numberOfTrackedEntities];
 		recordedTimes = new Location[numberOfTrackedEntities];
 		entityStats = new Location[numberOfTrackedEntities];
@@ -190,8 +194,27 @@ public final class Tracker extends StructureObject {
 	}
 	private void logLifespanStats(){
 		for(int i = 0; i < numberOfTrackedEntities; i++)if(this.trackedEntities[i]){
-		log("Entity " + String.valueOf(entityNames[i] != null ? entityNames[i] : ("number: "+ i)) + " took " + String.format("%.9f", (lifespanStats[i].x / ticksTracked)) + " seconds");
-		log("which is " + String.format("%.2f", lifespanStats[i].y) + "% of the time appropriated for a single tick");
+			log("Entity " + getEntityName(i) + " took " + String.format("%.9f", (lifespanStats[i].x / ticksTracked)) + " seconds");
+			log("which is " + String.format("%.2f", lifespanStats[i].y) + "% of the time appropriated for a single tick");
 		}
+	}
+	public void showComparison(int entity1, int entity2){
+		System.out.printf("Entity 1 took %.2f as much as entity 2 in their lifetime\n", lifespanStats[entity1].x / lifespanStats[entity2].x);
+	}
+	public void showComparison(){
+		double averageTime, totalTime = 0, numEntities = 0;
+		for(int i = 0; i < trackedEntities.length; i++)
+			if(trackedEntities[i]){
+				++numEntities;
+				totalTime += lifespanStats[i].x;
+			}
+		averageTime = totalTime / numEntities;
+		for(int i = 0; i < numberOfTrackedEntities; i++)if(trackedEntities[i]){
+			double percentage = 100 * ((1 - lifespanStats[i].x / averageTime) / (lifespanStats[i].x / averageTime));
+			System.out.printf("Entity %s was %.2f%% %s than the average\n", getEntityName(i), Math.abs(percentage),percentage > 0 ? "faster" : "slower");
+		}
+	}
+	private String getEntityName(int index){
+		return entityNames[index] != null ? entityNames[index] : ("number: "+ index);
 	}
 }

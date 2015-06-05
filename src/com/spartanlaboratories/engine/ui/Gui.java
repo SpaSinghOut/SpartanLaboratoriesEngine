@@ -353,7 +353,7 @@ public class Gui extends JFrame implements KeyListener, MouseListener{
 				console.out("Spacebar cannot make the player focus on a unit because the player does not own one");
 			}
 			try {
-				owner.coveringCamera(owner.getMouseLocationG()).handleKeyPress(arg0);
+				owner.coveringCamera(owner.getMouseLocation()).handleKeyPress(arg0);
 			} catch (SLEImproperInputException e) {
 				System.out.println("Spacebar was pressed while the mouse was outside the scope of any camera.");
 				System.out.println("Using the default camera instead");

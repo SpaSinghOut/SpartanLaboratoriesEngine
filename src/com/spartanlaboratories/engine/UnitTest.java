@@ -2,6 +2,8 @@ package com.spartanlaboratories.engine;
 
 import java.awt.event.KeyEvent;
 
+import org.lwjgl.opengl.GL11;
+
 import com.spartanlaboratories.engine.game.Ability;
 import com.spartanlaboratories.engine.game.Alive;
 import com.spartanlaboratories.engine.game.Hero;
@@ -26,7 +28,6 @@ class UnitTest extends Map{
 
 	@Override
 	protected void initializeSpawnPoints() {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -35,7 +36,9 @@ class UnitTest extends Map{
 		int newEntity = engine.tracker.addEntity();
 		engine.tracker.initialize();
 		engine.tracker.setEntityTracked(newEntity, true);
-		//engine.tracker.setNotifyPeriod(5);
+		engine.tracker.clearTrackedEntities();
+		engine.tracker.initialize(Tracker.TrackerPreset.PRESET_RUN);
+		engine.tracker.setNotifyPeriod(5);
 		Human human = new Human(engine, Alive.Faction.RADIANT);
 		Console console = human.gui.console;
 		
@@ -79,6 +82,7 @@ class UnitTest extends Map{
 		unit2.changeStat(Constants.health, 300);
 		
 		unit.setTexture("res/radiant creep.png");
+		
 	}
 	/*@Override
 	public void drawMap(StandardCamera camera){
