@@ -13,7 +13,9 @@ import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.ui.Gui;
 import com.spartanlaboratories.engine.util.Location;
 /**
- * A human version of a unit controller
+ * A human version of a unit controller. 
+ * As of version 2.0.0 the utility of the Human object has tended to specialize on the input received from the mouse and keyboard as well as 
+ * the handling of the graphical display of the world through the Camera objects owned by this object.
  * @author spart_000
  * @see <a href="Controller.html">Controller</a>
  */

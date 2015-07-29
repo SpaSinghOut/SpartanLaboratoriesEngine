@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.newdawn.slick.opengl.Texture;
 
 import com.spartanlaboratories.engine.game.Actor;
+import com.spartanlaboratories.engine.game.Hero;
 import com.spartanlaboratories.engine.game.VisibleObject;
 import com.spartanlaboratories.engine.ui.Gui;
 import com.spartanlaboratories.engine.util.Location;
@@ -41,6 +42,12 @@ public class DynamicCamera extends StructureObject implements Camera{
 		updateZoom();
 		zoomOut(1);
 	}
+	/**
+	 * Creates a DynamicCamera object with default properties. The default properties are: the location of the display is the center of the monitor, the size
+	 * of the display is the size of the monitor, the size of the world display has a 1:1 ratio to the size of the display, the world center is (0,0).
+	 * 
+	 * @param engine
+	 */
 	public DynamicCamera(Engine engine){
 		this(engine, new Rectangle(new Location(), engine.getScreenDimensions().x, engine.getScreenDimensions().y), 
 				new Rectangle(new Location(engine.getScreenDimensions().x / 2, engine.getScreenDimensions().y / 2), 
@@ -114,6 +121,9 @@ public class DynamicCamera extends StructureObject implements Camera{
 	}
 	public void setCentralZoom(boolean flag){
 		centralZoom = flag;
+	}
+	public void followMouseOnZoom(boolean flag){
+		centralZoom = !flag;
 	}
 	public void holdPointOnZoom(boolean flag){
 		holdPointZoom = flag;
@@ -288,10 +298,10 @@ public class DynamicCamera extends StructureObject implements Camera{
 	}
 	public boolean canSeeObjectPartially(VisibleObject visibleObject){
 		Rectangle area = visibleObject.getAreaCovered();
-		return withinWorldXBounds(area.getXMin())
-				|| withinWorldXBounds(area.getXMax())
-				|| withinWorldYBounds(area.getXMin())
-				|| withinWorldYBounds(area.getYMax());
+		return isWorldBound(area.northWest)
+			|| isWorldBound(area.northEast)
+			|| isWorldBound(area.southWest)
+			|| isWorldBound(area.southEast);
 	}
 	public boolean canSeeObjectCenter(VisibleObject visibleObject){
 		return isWorldBound(visibleObject.getLocation());
@@ -300,7 +310,7 @@ public class DynamicCamera extends StructureObject implements Camera{
 		Rectangle area = visibleObject.getAreaCovered();
 		return withinWorldXBounds(area.getXMin())
 				&& withinWorldXBounds(area.getXMax())
-				&& withinWorldYBounds(area.getXMin())
+				&& withinWorldYBounds(area.getYMin())
 				&& withinWorldYBounds(area.getYMax());
 	}
 	
@@ -338,14 +348,49 @@ public class DynamicCamera extends StructureObject implements Camera{
 		Texture texture = visibleObject.getTextureNE();
 		boolean hasTexture = texture != null;
 		Location[] quadCorners = new Location[4], textureValues = new Location[4];
+		
 		quadCorners[0] = getMonitorLocation(visibleObject.getAreaCovered().northWest);
 		quadCorners[1] = getMonitorLocation(visibleObject.getAreaCovered().northEast);
 		quadCorners[2] = getMonitorLocation(visibleObject.getAreaCovered().southEast);
 		quadCorners[3] = getMonitorLocation(visibleObject.getAreaCovered().southWest);
+		
 		textureValues[0] = new Location();
 		textureValues[1] = hasTexture ? new Location(texture.getWidth(), 0) : new Location();
 		textureValues[2] = hasTexture ? new Location(texture.getWidth(), texture.getHeight()): new Location();
 		textureValues[3] = hasTexture ? new Location(0, texture.getHeight()) :new Location();
+		
+		if((!canSeeObjectWholly(visibleObject)) && canSeeObjectPartially(visibleObject)){
+			Rectangle r = visibleObject.getAreaCovered();
+			if(r.getXMax() > world.getXMax()){
+				quadCorners[1].setX(monitor.getXMax());
+				quadCorners[2].setX(monitor.getXMax());
+				textureValues[1].magnify(new Location((world.getXMax() - r.getXMin()) / r.getSize().x,1));
+				textureValues[2].magnify(new Location((world.getXMax() - r.getXMin()) / r.getSize().x,1));
+			}
+			if(r.getXMin() < world.getXMin()){
+				quadCorners[0].setX(monitor.getXMin());
+				quadCorners[3].setX(monitor.getXMin());
+				double missingPortion = (world.getXMin() - r.getXMin()) / r.getSize().x;
+				textureValues[0].setX((texture != null ? texture.getWidth() * missingPortion : missingPortion));
+				textureValues[3].setX((texture != null ? texture.getWidth() * missingPortion : missingPortion));
+			}
+			if(r.getYMax() > world.getYMax()){
+				quadCorners[0].setY(monitor.getYMax());
+				quadCorners[1].setY(monitor.getYMax());
+				double missingPortion = (r.getYMax() - world.getYMax()) / r.getSize().y;
+				textureValues[2].setY((texture != null ? texture.getHeight() * (1 - missingPortion) : missingPortion));
+				textureValues[3].setY((texture != null ? texture.getHeight() * (1 - missingPortion) : missingPortion));
+			}
+			if(r.getYMin() < world.getYMin()){
+				quadCorners[2].setY(monitor.getYMin());
+				quadCorners[3].setY(monitor.getYMin());
+				double missingPortion = - (r.getYMin() - world.getYMin()) / r.getSize().y;
+				textureValues[0].setY((texture != null ? texture.getHeight() *  missingPortion : (1 / missingPortion)));
+				textureValues[1].setY((texture != null ? texture.getHeight() * missingPortion : (1 / missingPortion)));
+			} 
+		}
+		
+		
 		Quad quad = new Quad(quadCorners, textureValues);
 		quad.texture = texture;
 		quad.color = visibleObject.getColor();
@@ -393,7 +438,13 @@ public class DynamicCamera extends StructureObject implements Camera{
 
 	@Override
 	public ArrayList<VisibleObject> getQualifiedObjects() {
-		return engine.qt.retrieveBox(world.getXMin(), world.getYMin(), world.getXMax(), world.getYMax());
+		ArrayList<VisibleObject> potential = engine.qt.retrieveBox(world.getXMin() - 100, world.getYMin() - 100, world.getXMax() + 100, world.getYMax() + 100),
+								 real = new ArrayList<VisibleObject>();
+		for(VisibleObject vo:potential)
+			if(canSeeObjectPartially(vo))
+				real.add(vo);
+		System.out.println(real.size());
+		return real;
 	}
 	@Override
 	public void handleMouseWheel(int change, Location locationOnScreen) {

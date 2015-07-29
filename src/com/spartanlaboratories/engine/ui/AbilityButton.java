@@ -19,6 +19,13 @@ public class AbilityButton extends StateChangingButton implements MouseListener{
 	final double abilityButtonWidth = engine.getScreenDimensions().x * .0341;
 	final double abilityButtonHeight = engine.getScreenDimensions().y * .057;
 	static long leveledUseProtection;
+	/**
+	 * Creates a new ability button. WARNING only this constructor needs to be called, the interaction with the gui will be set up automatically and
+	 * if there is any other way that the API allows for the creation and/or modification of the ability buttons then it should be ignored.
+	 * 
+	 * @param setCorrespondingAbility The ability the casting of which will be attempted on the activation of this button.
+	 * @param setOwner The gui to which this button will belong and on which this button will appear.
+	 */
 	public AbilityButton(Ability setCorrespondingAbility, Gui setOwner){
 		super(setOwner);
 		owner.abilityButtons.add(this);
@@ -27,8 +34,8 @@ public class AbilityButton extends StateChangingButton implements MouseListener{
 		setSize((int)(abilityButtonWidth), (int) abilityButtonHeight);
 		setBackground(engine.util.getAsJavaColor(correspondingAbility.abilityStats.color));
 		setOpaque(true);
-		setVisible(true);
 		addMouseListener(this);
+		state = StateChangingButton.State.USE;
 	}
 	
 	public void setOwner(Gui gui){
@@ -56,7 +63,8 @@ public class AbilityButton extends StateChangingButton implements MouseListener{
 			//else if(correspondingAbility.castType == Ability.CastType.TOGGLE)
 			else if(correspondingAbility.abilityStats.castType == Castable.CastType.INSTANT || 
 					correspondingAbility.abilityStats.castType == Castable.CastType.TOGGLE)
-				((Hero)owner.owner.selectedUnit).castSpell(correspondingAbility);
+				((Hero)owner.owner.selectedUnit)
+				.castSpell(correspondingAbility);
 			break;
 		case LEVEL:
 			//prevents leveling the ability if it is maxed
@@ -76,7 +84,7 @@ public class AbilityButton extends StateChangingButton implements MouseListener{
 
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
-		owner.showDecription(true, correspondingAbility.abilityStats.name + " level: " + correspondingAbility.level);
+		owner.showDecription(true, correspondingAbility.abilityStats + " level: " + correspondingAbility.level);
 	}
 
 	@Override
@@ -87,8 +95,7 @@ public class AbilityButton extends StateChangingButton implements MouseListener{
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+				
 	}
 
 	@Override

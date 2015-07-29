@@ -42,7 +42,7 @@ public class Gui extends JFrame implements KeyListener, MouseListener{
 	LevelUpButton levelUpButton;
 	public ArrayList<BuffIcon> buffs = new ArrayList<BuffIcon>();
 	JTextArea description, rsBox;JScrollPane scrollPane;
-	public ArrayList<AbilityButton> abilityButtons = new ArrayList<AbilityButton>();
+	ArrayList<AbilityButton> abilityButtons = new ArrayList<AbilityButton>();
 	Human owner;
 	public GraphicalConsole console;
 	JMenuBar menuBar;
@@ -52,28 +52,41 @@ public class Gui extends JFrame implements KeyListener, MouseListener{
 	final int healthBarHeight;
 	StateChangingButton abilityPoints;
 	//End of constuctor initialization only
-	Shop shop;//not graphics dependent but requires outside initilization;
+	Shop shop;//not graphics dependent but requires outside initialization;
 	protected int numberOfCustomStats;
 	protected int[] customStats;
 	public Gui(Human setOwner){
+		// Sets the owner of the gui to be the passed in human object.
 		owner = setOwner;
+		// Sets the engine that this gui refereces to be the same as the engine of the human that owns this gui.
 		engine = owner.engine;
+		// Sets the display dimensions as decided on by the engine prior to the creation of this object.
 		screenX = (int) engine.getScreenDimensions().x;
 		screenY = (int) engine.getScreenDimensions().y;
+		// Makes this frame "decorated" which mean that it will look like a window.
+		// "Undecorated" would be preferred, however it causes problems and needs looking into.
 		setUndecorated(false);
 		
+		// Sets up this window's keyboard and mouse listeners.
 		getContentPane().addKeyListener(this);
+		getContentPane().addMouseListener(this);
+		// Creates the canvas which is the bridge between the window and the custom opengl graphics.
 		canvas.setLocation(0,0);
 		canvas.setSize(screenX, screenY);
 		canvas.setVisible(true);
 		canvas.setEnabled(true);
-		getContentPane().addMouseListener(this);
 		
+		// Sets various window properties.
 		setSize(screenX,screenY);
 		getContentPane().add(canvas,0);
 		getLayeredPane().add(getContentPane(),0);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		
+		// Handles window content properties.
+		/* Really needs to be better organized.
+		 * The same hierarchy of operations are being performed on different levels of function calls and 
+		 * not as a result of encapsulation. */
 		healthBarMaxWidth = (int) (engine.getScreenDimensions().x / 3);
 		healthBarHeight = (int) (engine.getScreenDimensions().y / 30);
 		customStats = new int[numberOfCustomStats];
@@ -91,6 +104,7 @@ public class Gui extends JFrame implements KeyListener, MouseListener{
 		getLayeredPane().add(shop);
 	}
 	final private void initHUD() {
+		// Handles the creation and the settion of various properties of HUD elements.
 		abilityPoints = new StateChangingButton(this);
 		HUD_component_level = new JLabel(((Integer)(1)).toString());
 		HUD_component_level.setLocation((int)(screenX * .236),(int)(screenY * .939));

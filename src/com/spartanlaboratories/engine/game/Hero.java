@@ -91,6 +91,7 @@ public class Hero<Element extends Ability> extends Alive{
 		Alive.allAlives.remove(this);
 	}
 	@Override
+	@Deprecated
 	public boolean drawMe(StandardCamera fromCamera)throws Util.NullColorException{
 		if(!super.drawMe(fromCamera, getRGB()))return false;
 		engine.util.drawVO(manaBar, manaBar.getColor(), fromCamera);

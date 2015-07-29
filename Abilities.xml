@@ -3,7 +3,7 @@
 	<tName>Fireball</tName>
 	<iDuration>10</iDuration>
 	<iCooldown>10</iCooldown>
-	<tCastType>PointTarget</tCastType>
+	<tCastType>Instant</tCastType>
 	<tLevellingType>Normal</tLevellingType>
 	<tColor>Red</tColor>
 </Ability>

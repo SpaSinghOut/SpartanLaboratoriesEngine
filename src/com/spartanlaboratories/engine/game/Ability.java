@@ -36,6 +36,7 @@ public abstract class Ability implements Castable{
 			FileInputStream fw = new FileInputStream("Abilities.xml");
 			XMLInputFactory xml = XMLInputFactory.newInstance();
 			XMLStreamReader reader = xml.createXMLStreamReader(fw);
+			name = abilityName;
 			while(reader.hasNext()){
 				if(reader.isStartElement() && reader.getLocalName() == "Ability"){
 					reader.next();
@@ -115,6 +116,9 @@ public abstract class Ability implements Castable{
 		void setOwner(Ability ability){
 			owner = ability;
 		}
+		public String toString(){
+			return name;
+		}
 	}
 	enum LevellingType{
 		DEFAULT,
@@ -163,18 +167,28 @@ public abstract class Ability implements Castable{
 	public int level;									//The amount of skill points that were put into this ability
 	private int castControl;							//Is used to prevent toggle skills from activating multiple times per click/press
 	public AbilityStats abilityStats;
+	/**
+	 * Creates a new Ability the basic stats of which will be read from an XML excerpt which will be found from the passed in String that is supposed to designate 
+	 * the ability name. This ability will belong to the passed in Hero object.
+	 * 
+	 * @param abilityName - The name of this ability
+	 * @param setOwner - The Hero object to which this ability will belong
+	 */
 	public Ability(String abilityName, Hero setOwner){
-		owner = setOwner;
+		// Sets the owner of this ability to be the passed in human
+		setOwner.addAbility(this);
+		// Creates the AbilityStats subobject.
 		try {
 			abilityStats = new AbilityStats(abilityName);
 		} catch (FileNotFoundException | XMLStreamException e) {
 			owner.engine.tracker.printAndLog("Something went wrong with ability initialization");
 			e.printStackTrace();
 		}
-		level = 0;
-		castControl = 0;
-		state = State.DOWN;
-		abilityStats.setOwner(this);
+		// Default settings.
+		level = 0;						// The ability will not be levelled to begin with.
+		castControl = 0;				// variable that controls long clicks.
+		state = State.DOWN;				// The ability will not be in a cast ready state to begin with.
+		abilityStats.setOwner(this);	// Sets self to be the owner of the ability stats object created above.
 	}
 	public enum State{
 		READY,DOWN,CHANNELING,ACTIVE ;

@@ -26,7 +26,7 @@ public class Rectangle extends Measurement<Rectangle>{
 		this(new Location(xMin, xMax), new Location(Math.abs(xMax - xMin),Math.abs(yMax - yMin)));
 	}
 	public String toString(){
-		return "(" + northWest.x + "," + northWest.y + ") (" + size.x + "," + size.y + ")";
+		return "(" + center.x + "," + center.y + ") (" + size.x + "," + size.y + ")";
 	}
 	public void duplicate(Rectangle rectangle){
 		center.duplicate(rectangle.getCenter());

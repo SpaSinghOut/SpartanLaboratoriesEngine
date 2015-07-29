@@ -1,7 +1,7 @@
 package com.spartanlaboratories.engine.structure;
 
 public class Constants {
-	public static final String versionString = "SLE v. A2.0.0 Pre-Release";
+	public static final String versionString = "SLE v. A2.0.0 Pre-Release remake";
 	//STATS
 	public static final int numberOfPowerUps = 6;
 	public static final int statsSize = 50;
